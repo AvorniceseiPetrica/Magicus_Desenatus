@@ -1,0 +1,25 @@
+- Commits done to this project should respect the following:
+
+    [type]([scope]):[commit message]
+
+    Examples:   "feat(main): Added a new window"
+                "chore: Changed folder structure"
+                "docs: Updated README"
+
+    - [type] = The type of commit done. Examples include: feat = feature, fix = fixes, docs = documentation etc.
+    - (optional) [scope] = The areas where changes have been made. This can either be an entire module or a single file.
+    - [commit message] = A short text that explains what has changed.
+
+------------------------------------------------------------------------------------------------------------------------
+
+- Branches created should be named as:
+
+    [owner]/[type]/[functionality]
+
+    Examples:   "VD/feat/player-movement"
+                "VornicuDavid/feat/spells"
+                "BC/fix/spells"
+
+    - [owner] = Either full name or abreviated.
+    - [type] = The type of implementation done: features, fixes, etc.
+    - [functionality] = Suggestive name for implementation. Check examples.

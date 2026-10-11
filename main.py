@@ -1,17 +1,10 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget
+from PyQt5.QtWidgets import QApplication
+from business.application.builder import build_coordinator
+from presentation.main_window import MainWindow
 
-
-def main():
+if __name__ == "__main__":
     app = QApplication(sys.argv)
-
-    window = QWidget()
-    window.setWindowTitle('Magus Desenatus')
-    window.setGeometry(100, 100, 400, 200)
-
+    window = MainWindow(build_coordinator())
     window.show()
-    sys.exit(app.exec())
-
-
-if __name__ == '__main__':
-    main()
+    sys.exit(app.exec_())

@@ -1,0 +1,18 @@
+from models.objects.tile import TileType
+
+TILE_CHARS = {
+    "#": TileType.WALL,
+    ".": TileType.FLOOR,
+}
+
+
+def tiles_from_text(rows: list[str]) -> list[list[TileType]]:
+    tiles = []
+    for y, row in enumerate(rows):
+        line = []
+        for x, ch in enumerate(row):
+            if ch not in TILE_CHARS:
+                raise ValueError(f"unknown map character {ch!r} at x={x}, y={y}")
+            line.append(TILE_CHARS[ch])
+        tiles.append(line)
+    return tiles

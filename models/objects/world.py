@@ -18,3 +18,5 @@ class World(Scene):
         else:
             self.height = len(self.tiles)
             self.width = len(self.tiles[0])
+            if any(len(row) != self.width for row in self.tiles):
+                raise ValueError("tiles must be rectangular")

@@ -1,7 +1,6 @@
 from models.objects.cutscene import Cutscene
 from models.objects.entity import Entity
 from models.objects.menu import Menu
-from models.objects.tile import TileType
 from models.objects.world import World
 from business.application.coordinator import Coordinator
 from business.application.world_logic.enemy_ai import ChaseAI
@@ -11,16 +10,30 @@ from business.application.states.abstract_state import StateId
 from business.application.states.menu_state import MenuState
 from business.application.states.world_state import WorldState
 from business.application.world_logic.turn_manager import TurnManager
+from business.application.world_logic.tile_reader import tiles_from_text
 
+_LEVEL = [
+    "################",
+    "#..............#",
+    "#.####....####.#",
+    "#.#..........#.#",
+    "#.#..........#.#",
+    "#......##......#",
+    "#.#..........#.#",
+    "#.#..........#.#",
+    "#.####....####.#",
+    "#..............#",
+    "################",
+]
 
 def build_coordinator() -> Coordinator:
-    world = World(entities=[
-        Entity("Hero", 1, 1, hp=5, is_player=True),
-        Entity("Goblin", 7, 6),
-    ])
-
-    for y in range(2, 6):
-        world.tiles[y][4] = TileType.WALL
+    world = World(
+        tiles=tiles_from_text(_LEVEL),
+        entities=[
+            Entity("Hero", 1, 1, hp=5, is_player=True),
+            Entity("Goblin", 7, 6),
+        ],
+    )
 
     states = {
         StateId.MENU: MenuState(Menu()),

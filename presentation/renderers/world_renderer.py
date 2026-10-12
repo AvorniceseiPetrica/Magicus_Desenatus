@@ -1,10 +1,17 @@
 from PyQt5.QtCore import QRect, Qt
 from PyQt5.QtGui import QColor, QPainter
+
+from models.objects.tile import TileType
 from models.objects.world import World
 from presentation.renderers.decal_cache import DecalCache
 from presentation.renderers.renderer import Renderer
 
 TILE_SIZE = 48
+
+TILE_COLORS = {
+    TileType.FLOOR: QColor("#2a2a33"),
+    TileType.WALL: QColor("#5a5a70"),
+}
 
 
 class WorldRenderer(Renderer):
@@ -14,10 +21,11 @@ class WorldRenderer(Renderer):
     def render(self, painter: QPainter, scene: World) -> None:
         painter.fillRect(painter.viewport(), QColor("#1e1e24"))
 
-        # grid
+        # tiles
         painter.setPen(QColor("#3a3a46"))
-        for gx in range(scene.width):
-            for gy in range(scene.height):
+        for gy, row in enumerate(scene.tiles):
+            for gx, tile in enumerate(row):
+                painter.fillRect(gx * TILE_SIZE, gy * TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_COLORS[tile])
                 painter.drawRect(gx * TILE_SIZE, gy * TILE_SIZE, TILE_SIZE, TILE_SIZE)
 
         # entities

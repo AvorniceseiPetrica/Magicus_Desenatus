@@ -1,4 +1,5 @@
 from models.objects.entity import Entity
+from models.objects.tile import TileType
 from models.objects.world import World
 
 
@@ -13,7 +14,7 @@ def in_bounds(world: World, x: int, y: int) -> bool:
 def move_or_attack(world: World, actor: Entity, dx: int, dy: int) -> bool:
     """Returns True if the actor used its action (moved or attacked)."""
     x, y = actor.x + dx, actor.y + dy
-    if not in_bounds(world, x, y):
+    if not is_walkable(world, x, y): #this also checks map bounds
         return False
     target = entity_at(world, x, y)
     if target is None:
@@ -25,3 +26,6 @@ def move_or_attack(world: World, actor: Entity, dx: int, dy: int) -> bool:
             world.entities.remove(target)
         return True
     return False
+
+def is_walkable(world: World, x: int, y: int) -> bool:
+    return in_bounds(world, x, y) and world.tiles[y][x] is not TileType.WALL

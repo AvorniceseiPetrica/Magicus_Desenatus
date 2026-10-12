@@ -1,6 +1,7 @@
 from models.objects.cutscene import Cutscene
 from models.objects.entity import Entity
 from models.objects.menu import Menu
+from models.objects.tile import TileType
 from models.objects.world import World
 from business.application.coordinator import Coordinator
 from business.application.world_logic.enemy_ai import ChaseAI
@@ -17,6 +18,10 @@ def build_coordinator() -> Coordinator:
         Entity("Hero", 1, 1, hp=5, is_player=True),
         Entity("Goblin", 7, 6),
     ])
+
+    for y in range(2, 6):
+        world.tiles[y][4] = TileType.WALL
+
     states = {
         StateId.MENU: MenuState(Menu()),
         StateId.WORLD: WorldState(world, TurnManager(ChaseAI())),

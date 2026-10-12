@@ -6,7 +6,7 @@ from models.objects.world import World
 from models.objects.cutscene import Cutscene
 from presentation.input_mapper import to_command
 from presentation.renderers.menu_renderer import MenuRenderer
-from presentation.renderers.world_renderer import WorldRenderer
+from presentation.renderers.world_renderer import WorldRenderer, TILE_SIZE
 from presentation.renderers.cutscene_renderer import CutsceneRenderer
 
 
@@ -19,7 +19,7 @@ class MainWindow(QWidget):
             World: WorldRenderer(),
             Cutscene: CutsceneRenderer(),
         }
-        self.resize(800, 600)
+        self.resize(TILE_SIZE * 25, TILE_SIZE * 16)
 
     def keyPressEvent(self, event):
         command = to_command(event.key())

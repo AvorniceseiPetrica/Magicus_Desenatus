@@ -4,7 +4,7 @@ from models.objects.world import World
 from presentation.renderers.decal_cache import DecalCache
 from presentation.renderers.renderer import Renderer
 
-TILE = 48
+TILE_SIZE = 48
 
 
 class WorldRenderer(Renderer):
@@ -18,11 +18,11 @@ class WorldRenderer(Renderer):
         painter.setPen(QColor("#3a3a46"))
         for gx in range(scene.width):
             for gy in range(scene.height):
-                painter.drawRect(gx * TILE, gy * TILE, TILE, TILE)
+                painter.drawRect(gx * TILE_SIZE, gy * TILE_SIZE, TILE_SIZE, TILE_SIZE)
 
         # entities
         for e in scene.entities:
-            rect = QRect(e.x * TILE + 2, e.y * TILE + 2, TILE - 4, TILE - 4)
+            rect = QRect(e.x * TILE_SIZE + 2, e.y * TILE_SIZE + 2, TILE_SIZE - 4, TILE_SIZE - 4)
             pixmap = self._decals.get(e.decal)
             if pixmap:
                 painter.drawPixmap(rect, pixmap)
@@ -36,4 +36,4 @@ class WorldRenderer(Renderer):
 
         # HUD
         painter.setPen(Qt.white)
-        painter.drawText(8, scene.height * TILE + 24, f"Turn {scene.turn}   (Esc: menu)")
+        painter.drawText(8, scene.height * TILE_SIZE + 24, f"Turn {scene.turn}   (Esc: menu)")

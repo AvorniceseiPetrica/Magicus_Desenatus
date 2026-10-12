@@ -11,6 +11,7 @@ TILE_SIZE = 48
 TILE_COLORS = {
     TileType.FLOOR: QColor("#2a2a33"),
     TileType.WALL: QColor("#5a5a70"),
+    TileType.CHASM: QColor("#e5e5e5"),
 }
 
 

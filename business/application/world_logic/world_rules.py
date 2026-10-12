@@ -1,5 +1,4 @@
 from models.objects.entity import Entity
-from models.objects.tile import TileType
 from models.objects.world import World
 
 
@@ -19,6 +18,8 @@ def move_or_attack(world: World, actor: Entity, dx: int, dy: int) -> bool:
     target = entity_at(world, x, y)
     if target is None:
         actor.x, actor.y = x, y
+        if world.tiles[y][x].props.deadly:  # new: stepped onto a deadly tile
+            world.entities.remove(actor)
         return True
     if target.is_player != actor.is_player:  # only attack the opposing side
         target.hp -= 1
@@ -28,4 +29,5 @@ def move_or_attack(world: World, actor: Entity, dx: int, dy: int) -> bool:
     return False
 
 def is_walkable(world: World, x: int, y: int) -> bool:
-    return in_bounds(world, x, y) and world.tiles[y][x] is not TileType.WALL
+    """In bounds AND the tile allows walking. Says nothing about entities."""
+    return in_bounds(world, x, y) and world.tiles[y][x].props.walkable

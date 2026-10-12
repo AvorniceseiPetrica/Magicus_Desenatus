@@ -3,6 +3,7 @@ from models.objects.tile import TileType
 TILE_CHARS = {
     "#": TileType.WALL,
     ".": TileType.FLOOR,
+    "~": TileType.CHASM
 }
 
 

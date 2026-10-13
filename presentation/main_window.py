@@ -54,11 +54,11 @@ class MainWindow(QWidget):
             return self._renderers[World].spell_grid
         return None
 
-
-
     #Event uri pentru grid ul de desenat
     def mousePressEvent(self, event):
-        self._drawing = True
+        if not self._drawing:
+            self._on_reset()
+            self._drawing = True
 
     def mouseReleaseEvent(self, event):
         self._drawing = False

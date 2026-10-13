@@ -10,13 +10,13 @@ class World(Scene):
     height: int = 15
     entities: list[Entity] = field(default_factory=list)
     turn: int = 1
-    tiles: list[list[TileType]] = field(default_factory=list)
+    map: list[list[TileType]] = field(default_factory=list)
 
     def __post_init__(self):
-        if not self.tiles:
-            self.tiles = [[TileType.FLOOR] * self.width for _ in range(self.height)]
+        if not self.map:
+            self.map = [[TileType.FLOOR] * self.height for _ in range(self.width)]
         else:
-            self.height = len(self.tiles)
-            self.width = len(self.tiles[0])
-            if any(len(row) != self.width for row in self.tiles):
-                raise ValueError("tiles must be rectangular")
+            self.width = len(self.map)
+            self.height = len(self.map[0])
+            if any(len(column) != self.height for column in self.map):
+                raise ValueError("map must be rectangular")

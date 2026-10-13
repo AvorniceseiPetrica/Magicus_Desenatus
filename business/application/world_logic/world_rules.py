@@ -18,7 +18,7 @@ def move_or_attack(world: World, actor: Entity, dx: int, dy: int) -> bool:
     target = entity_at(world, x, y)
     if target is None:
         actor.x, actor.y = x, y
-        if world.tiles[y][x].props.deadly:  # new: stepped onto a deadly tile
+        if world.map[y][x].props.deadly:  # new: stepped onto a deadly tile
             world.entities.remove(actor)
         return True
     if target.is_player != actor.is_player:  # only attack the opposing side
@@ -30,4 +30,4 @@ def move_or_attack(world: World, actor: Entity, dx: int, dy: int) -> bool:
 
 def is_walkable(world: World, x: int, y: int) -> bool:
     """In bounds AND the tile allows walking. Says nothing about entities."""
-    return in_bounds(world, x, y) and world.tiles[y][x].props.walkable
+    return in_bounds(world, x, y) and world.map[y][x].props.walkable

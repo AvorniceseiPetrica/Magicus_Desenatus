@@ -22,9 +22,9 @@ class WorldRenderer(Renderer):
     def render(self, painter: QPainter, scene: World) -> None:
         painter.fillRect(painter.viewport(), QColor("#1e1e24"))
 
-        # tiles
+        # map
         painter.setPen(QColor("#3a3a46"))
-        for gy, row in enumerate(scene.tiles):
+        for gy, row in enumerate(scene.map):
             for gx, tile in enumerate(row):
                 painter.fillRect(gx * _TILE_SIZE, gy * _TILE_SIZE, _TILE_SIZE, _TILE_SIZE, _TILE_COLORS[tile])
                 painter.drawRect(gx * _TILE_SIZE, gy * _TILE_SIZE, _TILE_SIZE, _TILE_SIZE)

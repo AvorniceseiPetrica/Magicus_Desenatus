@@ -7,7 +7,7 @@ _TILE_CHARS = {
 }
 
 
-def tiles_from_text(rows: list[str]) -> list[list[TileType]]:
+def map_from_text(rows: list[str]) -> list[list[TileType]]:
     tiles = []
     for y, row in enumerate(rows):
         line = []
@@ -17,3 +17,9 @@ def tiles_from_text(rows: list[str]) -> list[list[TileType]]:
             line.append(_TILE_CHARS[ch])
         tiles.append(line)
     return tiles
+
+_SYMBOLS = {tile: ch for ch, tile in _TILE_CHARS.items()}
+
+
+def map_to_text(tiles: list[list[TileType]]) -> list[str]:
+    return ["".join(_SYMBOLS[t] for t in row) for row in tiles]

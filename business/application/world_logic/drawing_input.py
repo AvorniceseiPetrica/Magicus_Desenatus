@@ -25,8 +25,6 @@ def verify_duplicated_nodes(grid: Grid, node: tuple[int, int]) -> bool:
         node1 = grid.visited[i]
         node2 = grid.visited[i + 1]
 
-        print ("Verificam legatura: ", node1, " si: ", node2, " sa nu fie egal cu ", last_node, " si: ", node)
-
         #verificam daca exista deja legatura, daca exista returnam false
         if (node1 == last_node) and (node2 == node) or (node1 == node) and (node2 == last_node):
             return False

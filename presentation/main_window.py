@@ -1,7 +1,7 @@
 from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QWidget, QPushButton
 from business.application.interfaces import GameInterface
-from business.application.world_logic.drawing_input import nearest_node
+from business.application.world_logic.drawing_input import nearest_node, verify_duplicated_nodes
 from models.objects.grid import Grid
 from models.objects.menu import Menu
 from models.objects.world import World
@@ -71,7 +71,7 @@ class MainWindow(QWidget):
         if spell_grid is None:
             return
         node = nearest_node(spell_grid, event.pos(), cell_size=60, padding=10)
-        if node:
+        if node and verify_duplicated_nodes(spell_grid, node):
             spell_grid.visited.append(node)
             self.update()
 

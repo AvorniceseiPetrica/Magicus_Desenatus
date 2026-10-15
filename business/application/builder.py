@@ -2,7 +2,7 @@ import random
 
 from business.application.world_logic.map_generator import generate_map
 from models.objects.cutscene import Cutscene
-from models.objects.entity import Entity
+from models.objects.entity import Entity, EntityState
 from models.objects.menu import Menu
 from models.objects.world import World
 from business.application.coordinator import Coordinator
@@ -46,17 +46,31 @@ def build_coordinator(seed: int | None = None) -> Coordinator:
     else:
         tiles = map_from_text(_LEVEL)
 
-    world = World(
-        map=tiles,
-        entities=[
-            Entity("Hero", 1, 1, hp=5, is_player=True, decal="player/default.png"),
-            Entity("Goblin", 7, 6, decal="enemies/level1/goblin.png")
-        ],
-    )
+    def new_world() -> World:
+        return World(
+            map=tiles,
+            entities=[
+                Entity("Hero", 1, 1, hp=5, is_player=True, sprites={
+                    EntityState.IDLE: ("player/idle/idle_1.png",
+                                       "player/idle/idle_2.png",
+                                       "player/idle/idle_3.png",
+                                       "player/idle/idle_4.png"
+                                       ),
+                    EntityState.MOVE: ("player/move/move_1.png",
+                                       "player/move/move_2.png",
+                                       "player/move/move_3.png",
+                                       "player/move/move_4.png"
+                                       )
+                }),
+                Entity("Goblin", 7, 6, sprites={
+                    EntityState.IDLE: ("enemies/level1/goblin.png",),
+                }),
+            ],
+        )
 
     states = {
         StateId.MENU: MenuState(Menu()),
-        StateId.WORLD: WorldState(world, TurnManager(ChaseAI())),
+        StateId.WORLD: WorldState(new_world, TurnManager(ChaseAI())),
         StateId.CUTSCENE: CutsceneState(
             Cutscene(lines=["Long ago...", "A magician set out.", "Press Enter to begin."])
         ),

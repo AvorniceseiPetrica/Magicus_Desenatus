@@ -20,4 +20,6 @@ class MenuState(AbstractState):
             self._menu.selected = (self._menu.selected + 1) % n
         elif command is Command.CONFIRM and self._menu.selected == 0:
             return StateId.WORLD
+        elif command is Command.CONFIRM and self._menu.selected == 1:
+            exit()
         return None

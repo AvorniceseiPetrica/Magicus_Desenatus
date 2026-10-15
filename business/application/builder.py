@@ -50,8 +50,14 @@ def build_coordinator(seed: int | None = None) -> Coordinator:
         return World(
             map=tiles,
             entities=[
-                Entity("Hero", 1, 1, hp=5, is_player=True, decal="player/default.png"),
-                Entity("Goblin", 7, 6, decal="enemies/level1/goblin.png"),
+                Entity("Hero", 1, 1, hp=5, is_player=True, decal=(
+                                                                "player/idle/idle_1.png",
+                                                                "player/idle/idle_2.png",
+                                                                "player/idle/idle_3.png",
+                                                                "player/idle/idle_4.png",
+                                                                )
+                       ),
+                Entity("Goblin", 7, 6, decal=("enemies/level1/goblin.png",))
             ],
         )
 

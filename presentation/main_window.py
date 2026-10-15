@@ -1,3 +1,4 @@
+from PyQt5.QtCore import QTimer
 from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QWidget, QPushButton
 from business.application.interfaces import GameInterface
@@ -24,6 +25,10 @@ class MainWindow(QWidget):
         self._grid_buttons()
         self._drawing = False
         self.resize(_TILE_SIZE * 25, _TILE_SIZE * 16)
+
+        self._anim_timer = QTimer(self)
+        self._anim_timer.timeout.connect(self.update)
+        self._anim_timer.start(16)
 
     def keyPressEvent(self, event):
         command = to_command(event.key())

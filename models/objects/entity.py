@@ -7,5 +7,5 @@ class Entity:
     x: int
     y: int
     hp: int = 3
-    decal: str = ""  # path/key of the sprite in models/sprites/entities
+    decal: tuple[str, ...] = ()
     is_player: bool = False

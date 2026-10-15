@@ -67,7 +67,7 @@ class WorldRenderer(Renderer):
                              f"{e.hp}hp")
 
         #desenam grid ul
-        self._grid_renderer.render(painter, scene)
+        #self._grid_renderer.render(painter, scene)
 
         # HUD
         painter.setPen(Qt.white)

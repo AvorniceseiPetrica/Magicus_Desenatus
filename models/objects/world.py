@@ -14,9 +14,9 @@ class World(Scene):
 
     def __post_init__(self):
         if not self.map:
-            self.map = [[TileType.FLOOR] * self.height for _ in range(self.width)]
+            self.map = [[TileType.FLOOR] * self.width for _ in range(self.height)]
         else:
-            self.width = len(self.map)
-            self.height = len(self.map[0])
-            if any(len(column) != self.height for column in self.map):
+            self.height = len(self.map)
+            self.width = len(self.map[0])
+            if any(len(row) != self.width for row in self.map):
                 raise ValueError("map must be rectangular")

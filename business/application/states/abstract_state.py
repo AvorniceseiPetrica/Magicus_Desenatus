@@ -9,7 +9,6 @@ class StateId(Enum):
     MENU = auto()
     WORLD = auto()
     CUTSCENE = auto()
-    QUIT = auto()
 
 
 class AbstractState(ABC):

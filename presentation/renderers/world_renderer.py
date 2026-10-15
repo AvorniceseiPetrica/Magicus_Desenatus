@@ -13,16 +13,15 @@ from presentation.renderers.renderer import Renderer
 _TILE_SIZE = 48
 _SPRITES_ROOT = Path(__file__).resolve().parents[2] / "models" / "sprites"
 
-_TILE_COLORS = {
-    TileType.FLOOR: QColor("#2a2a33"),
-    TileType.WALL: QColor("#5a5a70"),
-    TileType.CHASM: QColor("#e5e5e5"),
-}
-
 _TILE_SPRITES = {
-    TileType.FLOOR: "tiles/floor.png",
-    TileType.WALL:  "tiles/wall.png",
-    TileType.CHASM: "tiles/chasm.png",
+    TileType.EMPTY: "other/empty.png",
+    TileType.FLOOR_LIGHT_1: "tiles/level1/floor_light_1.png",
+    TileType.FLOOR_LIGHT_2: "tiles/level1/floor_light_2.png",
+    TileType.FLOOR_DARK_1: "tiles/level1/floor_dark_1.png",
+    TileType.FLOOR_DARK_2: "tiles/level1/floor_dark_2.png",
+    TileType.FLOOR_DARK_3: "tiles/level1/floor_dark_3.png",
+    TileType.WALL: "tiles/level1/wall.png",
+    TileType.CHASM: "tiles/level1/chasm.png",
 }
 assert set(_TILE_SPRITES) == set(TileType)
 
@@ -49,7 +48,7 @@ class WorldRenderer(Renderer):
                 if pixmap:
                     painter.drawPixmap(rect, pixmap)
                 else:
-                    painter.fillRect(rect, _TILE_COLORS[tile])
+                    painter.fillRect(rect, QColor("#ff00ff"))  # magenta = missing sprite
                     painter.drawRect(rect)
 
         # entities
@@ -67,7 +66,7 @@ class WorldRenderer(Renderer):
                              f"{e.hp}hp")
 
         #desenam grid ul
-        self._grid_renderer.render(painter, scene)
+        #self._grid_renderer.render(painter, scene)
 
         # HUD
         painter.setPen(Qt.white)

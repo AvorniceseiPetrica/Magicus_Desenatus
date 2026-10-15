@@ -18,17 +18,21 @@ from business.application.world_logic.map_reader import map_from_text
 USE_RANDOM_MAP = False
 
 _LEVEL = [
-    "################",
-    "#..............#",
-    "#.####....####.#",
-    "#.#....~~....#.#",
-    "#.#....~~....#.#",
-    "#......##......#",
-    "#.#..........#.#",
-    "#.#..........#.#",
-    "#.####....####.#",
-    "#..............#",
-    "################",
+    "WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL",
+    "WAL FL2 FD3 FL1 FD3 FL2 FD3 FL1 FD3 FL2 FD3 FL1 FD3 FL2 FD3 FL1 FD3 FL2 FD3 FL1 FD3 FL2 FD3 FL1 WAL",
+    "WAL FD2 WAL WAL WAL WAL FL2 FD2 FL1 FD2 FL2 FD2 CHA CHA CHA FD2 FL1 FD2 FL2 FD2 WAL WAL WAL FD2 WAL",
+    "WAL FL2 WAL FL1 FD1 FL2 FD1 FL1 FD1 FL2 FD1 FL1 FD1 CHA CHA CHA FD1 FL2 FD1 FL1 FD1 FL2 FD1 FL1 WAL",
+    "WAL FD3 WAL FD3 FL1 WAL WAL WAL WAL FD3 FL2 FD3 FL1 CHA CHA CHA FL1 FD3 FL2 WAL WAL WAL WAL FD3 WAL",
+    "WAL FL2 WAL FL1 FD2 WAL FD2 FL1 FD2 FL2 FD2 FL1 FD2 FL2 FD2 FL1 FD2 FL2 FD2 FL1 WAL FL2 FD2 FL1 WAL",
+    "WAL FD1 FL2 FD1 FL1 WAL FL2 FD1 FL1 WAL WAL WAL WAL FD1 FL2 FD1 FL1 FD1 FL2 FD1 WAL FD1 FL2 FD1 WAL",
+    "WAL FL2 WAL WAL WAL WAL FD3 FL1 FD3 WAL FD3 FL1 WAL FL2 FD3 FL1 CHA CHA FD3 FL1 WAL FL2 WAL WAL WAL",
+    "WAL FD2 FL2 FD2 FL1 FD2 FL2 FD2 FL1 FD2 FL2 FD2 WAL FD2 FL2 FD2 CHA CHA FL2 FD2 FL1 FD2 FL2 FD2 WAL",
+    "WAL FL2 WAL WAL WAL FL2 FD1 FL1 FD1 WAL WAL WAL WAL FL2 FD1 FL1 FD1 FL2 FD1 FL1 FD1 FL2 FD1 FL1 WAL",
+    "WAL FD3 FL2 FD3 WAL FD3 FL2 FD3 FL1 FD3 FL2 FD3 CHA CHA CHA CHA FL1 FD3 WAL WAL WAL WAL FL2 FD3 WAL",
+    "WAL FL2 WAL FL1 WAL FL2 WAL WAL WAL WAL FD2 FL1 CHA CHA CHA CHA FD2 FL2 WAL FL1 FD2 FL2 FD2 FL1 WAL",
+    "WAL FD1 WAL FD1 FL1 FD1 FL2 FD1 FL1 FD1 WAL FD1 FL1 FD1 FL2 FD1 FL1 FD1 FL2 FD1 WAL FD1 WAL FD1 WAL",
+    "WAL FL2 FD3 FL1 FD3 FL2 WAL WAL WAL WAL WAL FL1 FD3 FL2 FD3 WAL FD3 FL2 FD3 FL1 FD3 FL2 FD3 WAL WAL",
+    "WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL",
 ]
 
 def build_coordinator(seed: int | None = None) -> Coordinator:
@@ -45,8 +49,8 @@ def build_coordinator(seed: int | None = None) -> Coordinator:
     world = World(
         map=tiles,
         entities=[
-            Entity("Hero", 1, 1, hp=5, is_player=True),
-            Entity("Goblin", 7, 6),
+            Entity("Hero", 1, 1, hp=5, is_player=True, decal="player/default.png"),
+            Entity("Goblin", 7, 6, decal="enemies/level1/goblin.png")
         ],
     )
 

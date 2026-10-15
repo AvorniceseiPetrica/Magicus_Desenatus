@@ -22,7 +22,6 @@ class MainWindow(QWidget):
             Cutscene: CutsceneRenderer(),
         }
         self._grid_buttons()
-        self.resize(800, 600)
         self._drawing = False
         self.resize(_TILE_SIZE * 25, _TILE_SIZE * 16)
 
@@ -30,7 +29,7 @@ class MainWindow(QWidget):
         command = to_command(event.key())
         if command:
             self._game.handle_input(command)
-            self._update_ui()
+            #self._update_ui()
             self.update()
 
     def _update_ui(self):

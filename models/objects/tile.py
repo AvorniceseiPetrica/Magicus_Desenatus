@@ -3,7 +3,12 @@ from enum import Enum, auto
 
 
 class TileType(Enum):
-    FLOOR = auto()
+    EMPTY = auto()
+    FLOOR_LIGHT_1 = auto()
+    FLOOR_LIGHT_2 = auto()
+    FLOOR_DARK_1 = auto()
+    FLOOR_DARK_2 = auto()
+    FLOOR_DARK_3 = auto()
     WALL = auto()
     CHASM = auto()
 
@@ -19,7 +24,12 @@ class TileProperties:
 
 
 TILE_PROPS = {
-    TileType.FLOOR: TileProperties(walkable=True),
+    TileType.EMPTY: TileProperties(walkable=True),
+    TileType.FLOOR_LIGHT_1: TileProperties(walkable=True),
+    TileType.FLOOR_LIGHT_2: TileProperties(walkable=True),
+    TileType.FLOOR_DARK_1: TileProperties(walkable=True),
+    TileType.FLOOR_DARK_2: TileProperties(walkable=True),
+    TileType.FLOOR_DARK_3: TileProperties(walkable=True),
     TileType.WALL:  TileProperties(walkable=False),
     TileType.CHASM: TileProperties(walkable=True, deadly=True),
 }

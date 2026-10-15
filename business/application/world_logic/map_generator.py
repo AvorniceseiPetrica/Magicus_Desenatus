@@ -1,6 +1,9 @@
 import random
 from models.objects.tile import TileType
 
+_FLOORS = [TileType.FLOOR_LIGHT_1, TileType.FLOOR_LIGHT_2,
+           TileType.FLOOR_DARK_1, TileType.FLOOR_DARK_2, TileType.FLOOR_DARK_3]
+
 
 def generate_map(width: int, height: int, seed: int,
                    wall_chance: float = 0.2) -> list[list[TileType]]:
@@ -13,6 +16,6 @@ def generate_map(width: int, height: int, seed: int,
             if on_border or rng.random() < wall_chance:
                 row.append(TileType.WALL)
             else:
-                row.append(TileType.FLOOR)
+                row.append(rng.choice(_FLOORS))
         tiles.append(row)
     return tiles

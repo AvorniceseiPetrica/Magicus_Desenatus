@@ -14,7 +14,7 @@ class World(Scene):
 
     def __post_init__(self):
         if not self.map:
-            self.map = [[TileType.FLOOR] * self.width for _ in range(self.height)]
+            self.map = [[TileType.FLOOR_LIGHT_1] * self.width for _ in range(self.height)]
         else:
             self.height = len(self.map)
             self.width = len(self.map[0])

@@ -15,7 +15,7 @@ from business.application.states.world_state import WorldState
 from business.application.world_logic.turn_manager import TurnManager
 from business.application.world_logic.map_reader import map_from_text
 
-USE_RANDOM_MAP = True
+USE_RANDOM_MAP = False
 
 _LEVEL = [
     "################",

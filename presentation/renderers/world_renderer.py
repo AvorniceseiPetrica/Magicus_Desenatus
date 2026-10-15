@@ -3,6 +3,7 @@ from pathlib import Path
 from PyQt5.QtCore import QRect, Qt
 from PyQt5.QtGui import QColor, QPainter
 
+from models.objects.entity import EntityState
 from models.objects.grid import Grid
 from models.objects.tile import TileType
 from models.objects.world import World
@@ -13,7 +14,13 @@ from presentation.renderers.renderer import Renderer
 import time
 
 _MOVE_MS = 150
-_IDLE_FRAME_MS = 300
+
+_FRAME_MS = {
+    EntityState.IDLE: 300,
+    EntityState.MOVE: 75,
+    EntityState.ATTACK: 100,
+    EntityState.HURT: 100,
+}
 
 _TILE_SIZE = 48
 _SPRITES_ROOT = Path(__file__).resolve().parents[2] / "models" / "sprites"
@@ -36,6 +43,7 @@ class WorldRenderer(Renderer):
         self._decals = decals or DecalCache(_SPRITES_ROOT)
         self._grid_renderer = GridRenderer(Grid())
         self._slides: dict[int, tuple] = {}
+        self._latched: dict[int, tuple] = {}
 
     @property
     def spell_grid(self) -> Grid:
@@ -62,12 +70,13 @@ class WorldRenderer(Renderer):
         now = time.monotonic() * 1000
         live = {id(e) for e in scene.entities}
         self._slides = {k: v for k, v in self._slides.items() if k in live}
+        self._latched = {k: v for k, v in self._latched.items() if k in live}
 
         for e in scene.entities:
-            cx, cy, moving = self._drawn_pos(e, now)
+            cx, cy = self._drawn_pos(e, now)
             rect = QRect(round(cx * _TILE_SIZE) + 2, round(cy * _TILE_SIZE) + 2,
                          _TILE_SIZE - 4, _TILE_SIZE - 4)
-            pixmap = self._decals.get(self._frame(e.decal, moving, now))
+            pixmap = self._decals.get(self._frame(e, now))
             if pixmap:
                 painter.drawPixmap(rect, pixmap)
             else:
@@ -93,10 +102,18 @@ class WorldRenderer(Renderer):
             fx, fy, tx, ty, t0 = cx, cy, e.x, e.y, now
             k = 0.0
         self._slides[id(e)] = (fx, fy, tx, ty, t0)
-        return cx, cy, k < 1.0
+        return cx, cy
 
-    @staticmethod
-    def _frame(frames, moving, now):
-        if not frames:
-            return ""
-        return frames[0] if moving else frames[int(now // _IDLE_FRAME_MS) % len(frames)]
+    def _frame(self, e, now):
+        key = (e.state, e.state_seq)
+        latched = self._latched.get(id(e))
+        if latched is None or latched[0] != key:  # new action: restart its animation
+            latched = (key, now)
+            self._latched[id(e)] = latched
+        frames = e.sprites.get(e.state, ())
+        if e.state is not EntityState.IDLE and frames:
+            i = int((now - latched[1]) // _FRAME_MS[e.state])
+            if i < len(frames):  # one-shot still playing
+                return frames[i]
+        idle = e.sprites.get(EntityState.IDLE, ())
+        return idle[int(now // _FRAME_MS[EntityState.IDLE]) % len(idle)] if idle else ""

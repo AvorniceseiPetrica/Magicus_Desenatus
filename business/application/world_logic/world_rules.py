@@ -1,4 +1,4 @@
-from models.objects.entity import Entity
+from models.objects.entity import Entity, EntityState
 from models.objects.world import World
 
 
@@ -18,11 +18,14 @@ def move_or_attack(world: World, actor: Entity, dx: int, dy: int) -> bool:
     target = entity_at(world, x, y)
     if target is None:
         actor.x, actor.y = x, y
-        if world.map[y][x].props.deadly:  # new: stepped onto a deadly tile
+        actor.set_state(EntityState.MOVE)
+        if world.map[y][x].props.deadly:
             world.entities.remove(actor)
         return True
-    if target.is_player != actor.is_player:  # only attack the opposing side
+    if target.is_player != actor.is_player:
         target.hp -= 1
+        actor.set_state(EntityState.ATTACK)
+        target.set_state(EntityState.HURT)
         if target.hp <= 0:
             world.entities.remove(target)
         return True

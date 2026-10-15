@@ -3,9 +3,11 @@ from pathlib import Path
 from PyQt5.QtCore import QRect, Qt
 from PyQt5.QtGui import QColor, QPainter
 
+from models.objects.grid import Grid
 from models.objects.tile import TileType
 from models.objects.world import World
 from presentation.renderers.decal_cache import DecalCache
+from presentation.renderers.grid_renderer import GridRenderer
 from presentation.renderers.renderer import Renderer
 
 _TILE_SIZE = 48
@@ -28,9 +30,15 @@ assert set(_TILE_SPRITES) == set(TileType)
 class WorldRenderer(Renderer):
     def __init__(self, decals: DecalCache | None = None):
         self._decals = decals or DecalCache(_SPRITES_ROOT)
+        self._grid_renderer = GridRenderer(Grid())
+
+    @property
+    def spell_grid(self) -> Grid:
+        return self._grid_renderer.spell_grid
 
     def render(self, painter: QPainter, scene: World) -> None:
         painter.fillRect(painter.viewport(), QColor("#1e1e24"))
+
 
         # map
         painter.setPen(QColor("#3a3a46"))
@@ -57,6 +65,9 @@ class WorldRenderer(Renderer):
             painter.setPen(Qt.white)
             painter.drawText(rect.adjusted(0, 0, 0, -2), Qt.AlignBottom | Qt.AlignHCenter,
                              f"{e.hp}hp")
+
+        #desenam grid ul
+        self._grid_renderer.render(painter, scene)
 
         # HUD
         painter.setPen(Qt.white)

@@ -15,13 +15,13 @@ _SPRITES_ROOT = Path(__file__).resolve().parents[2] / "models" / "sprites"
 
 _TILE_SPRITES = {
     TileType.EMPTY: "other/empty.png",
-    TileType.FLOOR_LIGHT_1: "level1/tiles/floor_light_1.png",
-    TileType.FLOOR_LIGHT_2: "level1/tiles/floor_light_2.png",
-    TileType.FLOOR_DARK_1: "level1/tiles/floor_dark_1.png",
-    TileType.FLOOR_DARK_2: "level1/tiles/floor_dark_2.png",
-    TileType.FLOOR_DARK_3: "level1/tiles/floor_dark_3.png",
-    TileType.WALL: "test/wall.png",
-    TileType.CHASM: "test/chasm.png",
+    TileType.FLOOR_LIGHT_1: "tiles/level1/floor_light_1.png",
+    TileType.FLOOR_LIGHT_2: "tiles/level1/floor_light_2.png",
+    TileType.FLOOR_DARK_1: "tiles/level1/floor_dark_1.png",
+    TileType.FLOOR_DARK_2: "tiles/level1/floor_dark_2.png",
+    TileType.FLOOR_DARK_3: "tiles/level1/floor_dark_3.png",
+    TileType.WALL: "tiles/level1/wall.png",
+    TileType.CHASM: "tiles/level1/chasm.png",
 }
 assert set(_TILE_SPRITES) == set(TileType)
 

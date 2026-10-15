@@ -46,17 +46,18 @@ def build_coordinator(seed: int | None = None) -> Coordinator:
     else:
         tiles = map_from_text(_LEVEL)
 
-    world = World(
-        map=tiles,
-        entities=[
-            Entity("Hero", 1, 1, hp=5, is_player=True, decal="player/default.png"),
-            Entity("Goblin", 7, 6, decal="enemies/level1/goblin.png")
-        ],
-    )
+    def new_world() -> World:
+        return World(
+            map=tiles,
+            entities=[
+                Entity("Hero", 1, 1, hp=5, is_player=True, decal="player/default.png"),
+                Entity("Goblin", 7, 6, decal="enemies/level1/goblin.png"),
+            ],
+        )
 
     states = {
         StateId.MENU: MenuState(Menu()),
-        StateId.WORLD: WorldState(world, TurnManager(ChaseAI())),
+        StateId.WORLD: WorldState(new_world, TurnManager(ChaseAI())),
         StateId.CUTSCENE: CutsceneState(
             Cutscene(lines=["Long ago...", "A magician set out.", "Press Enter to begin."])
         ),

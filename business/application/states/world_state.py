@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Callable
 from models.objects.world import World
 from business.application.commands import Command
 from business.application.world_logic.turn_manager import TurnManager
@@ -12,8 +12,9 @@ _DIRECTIONS = {
 
 
 class WorldState(AbstractState):
-    def __init__(self, world: World, turn_manager: TurnManager):
-        self._world = world
+    def __init__(self, new_world: Callable[[], World], turn_manager: TurnManager):
+        self._new_world = new_world
+        self._world = new_world()
         self._turns = turn_manager
 
     @property
@@ -28,5 +29,8 @@ class WorldState(AbstractState):
             return None
         player = next((e for e in self._world.entities if e.is_player), None)
         if player and move_or_attack(self._world, player, *direction):
-            self._turns.end_player_turn(self._world)  # the turn only advances on a valid action
+            self._turns.end_player_turn(self._world)
+            if not any(e.is_player for e in self._world.entities):  # player died
+                self._world = self._new_world()
+                return StateId.MENU
         return None

@@ -1,6 +1,8 @@
 from pathlib import Path
 from models.objects.entity import EntityState
 
+FULLSCREEN = False
+
 # --- gameplay: nu depinde de fereastră ---
 GRID_COLUMNS = 25
 GRID_ROWS = 15

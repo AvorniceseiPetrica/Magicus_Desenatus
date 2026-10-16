@@ -1,5 +1,7 @@
 import copy
 from typing import Callable, Optional
+
+from models.objects.elements import Direction
 from models.objects.frame import WorldFrame
 from models.objects.world import World
 from business.application.commands import Command, Input, SpellRequest
@@ -8,6 +10,8 @@ from business.application.playback.interpreter import ActionInterpreter
 from business.application.world_logic.turn_processor import TurnProcessor
 from business.application.states.abstract_state import AbstractState, StateId
 
+_MOVES = {Command.UP: Direction.UP, Command.DOWN: Direction.DOWN,
+          Command.LEFT: Direction.LEFT, Command.RIGHT: Direction.RIGHT}
 
 class WorldState(AbstractState):
     def __init__(self, new_world: Callable[[], World], turns: TurnProcessor,
@@ -26,12 +30,15 @@ class WorldState(AbstractState):
             return None  # input locked while playing
         if command is Command.CANCEL:
             return StateId.MENU
-        if isinstance(command, SpellRequest):
-            snapshot = copy.deepcopy(self._world)  # what the player sees right now
-            actions = self._turns.run_turn(self._world, command)  # logic is final immediately
-            self._interpreter.start(snapshot, actions)
-            if not actions:
-                self._frame = self._idle()
+        move = _MOVES.get(command)
+        if move is None and not isinstance(command, SpellRequest):
+            return None
+        snapshot = copy.deepcopy(self._world)  # what the player sees right now
+        actions = (self._turns.run_move(self._world, move) if move is not None
+                   else self._turns.run_turn(self._world, command))  # logic is final immediately
+        self._interpreter.start(snapshot, actions)
+        if not actions:
+            self._frame = self._idle()
         return None
 
     def update(self) -> Optional[StateId]:

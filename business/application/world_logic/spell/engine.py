@@ -51,7 +51,7 @@ class SpellEngine:
             dx, dy = d.value
             for _ in range(step):                            # first tile = adjacent to start
                 nxt = (pos[0] + dx, pos[1] + dy)
-                if not ctx.world.passable(*nxt):
+                if not ctx.world.flyable(*nxt):
                     break                                    # wall / map edge ends the arrow
                 ctx.emit(ProjectileMoved(affinity, pos, nxt))
                 pos = nxt
@@ -66,7 +66,7 @@ class SpellEngine:
         r = self._rules.aoe_radius
         tiles = tuple((center[0] + dx, center[1] + dy)
                       for dy in range(-r, r + 1) for dx in range(-r, r + 1)
-                      if ctx.world.passable(center[0] + dx, center[1] + dy))
+                      if ctx.world.flyable(center[0] + dx, center[1] + dy))
         ctx.emit(AoeReleased(affinity, center, tiles))
         victims = [e for t in tiles if (e := ctx.world.entity_at(*t)) and e.id != caster.id]
         for v in victims:

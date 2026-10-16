@@ -1,5 +1,6 @@
 # turn_processor.py
-from models.objects.actions import ActionList, ManaChanged
+from models.objects.actions import ActionList, EntityDied, EntityMoved, ManaChanged
+from models.objects.elements import Direction
 from models.objects.entity import Entity
 from models.objects.world import World
 from .action_applier import ActionApplier
@@ -22,9 +23,28 @@ class TurnProcessor:
         actions: ActionList = []
         if world.player:
             actions += self._cast(world, world.player, player_request)
+        return actions + self._end_turn(world)
+
+    def run_move(self, world: World, direction: Direction) -> ActionList:
+        """Test movement with the arrow keys: one step, then the usual enemy phase."""
+        player = world.player
+        if player is None:
+            return []
+        x, y = player.x + direction.value[0], player.y + direction.value[1]
+        if not (world.in_bounds(x, y) and world.map[y][x].props.walkable
+                and world.entity_at(x, y) is None):
+            return []  # blocked: no turn used
+        actions: ActionList = [EntityMoved(player.id, (player.x, player.y), (x, y))]
+        if world.map[y][x].props.deadly:
+            actions.append(EntityDied(player.id))  # fell into a chasm
+        self._applier.apply_all(world, actions)
+        return actions + self._end_turn(world)
+
+    def _end_turn(self, world: World) -> ActionList:
+        actions: ActionList = []
         for enemy in world.enemies:
             if world.get(enemy.id) is None or world.player is None:
-                continue                                   # died mid-round / player is dead
+                continue  # died mid-round / player is dead
             actions += self._cast(world, enemy, self._ai.choose_spell(enemy, world))
         actions += self._regen(world)
         world.turn += 1

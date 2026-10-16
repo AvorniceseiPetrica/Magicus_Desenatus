@@ -9,7 +9,7 @@ from business.application.world_logic.drawing_input import nearest_node, verify_
 from business.application.world_logic.path_comverter import path_to_directions
 from models.objects.grid import Grid
 from models.objects.menu import Menu
-from models.objects.world import World
+from models.objects.frame import WorldFrame
 from models.objects.cutscene import Cutscene
 from presentation.input_mapper import to_command
 from presentation.renderers.menu_renderer import MenuRenderer
@@ -24,7 +24,7 @@ class MainWindow(QWidget):
         self._game = game
         self._renderers = {  # scene type -> renderer
             Menu: MenuRenderer(),
-            World: WorldRenderer(),
+            WorldFrame: WorldRenderer(),
             Cutscene: CutsceneRenderer(),
         }
         self._selector = SpellSelector(self)
@@ -57,7 +57,7 @@ class MainWindow(QWidget):
 
     def _update_ui(self):
         scene = self._game.current_scene()
-        if isinstance(scene, World):
+        if isinstance(scene, WorldFrame):
             self._btn_confirm.setVisible(True)
             self._btn_reset.setVisible(True)
         else:
@@ -73,8 +73,8 @@ class MainWindow(QWidget):
 
     def _get_grid(self) -> Grid | None:
         scene = self._game.current_scene()
-        if isinstance(scene, World):
-            return self._renderers[World].spell_grid
+        if isinstance(scene, WorldFrame):
+            return self._renderers[WorldFrame].spell_grid
         return None
 
     #Event uri pentru grid ul de desenat
@@ -117,6 +117,9 @@ class MainWindow(QWidget):
         #pozitionarea butoanelor
         self._btn_confirm.setGeometry(360, 10, 100, 36)
         self._btn_reset.setGeometry(360, 56, 100, 36)
+
+        self._btn_confirm.setFocusPolicy(Qt.NoFocus)
+        self._btn_reset.setFocusPolicy(Qt.NoFocus)
 
     def _on_confirm(self):
         grid = self._get_grid()

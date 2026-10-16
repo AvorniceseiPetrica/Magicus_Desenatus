@@ -22,6 +22,7 @@ from business.application.states.menu_state import MenuState
 from business.application.states.world_state import WorldState
 from business.application.world_logic.turn_manager import TurnManager
 from business.application.world_logic.map_reader import map_from_file
+from business.application.playback.interpreter import ActionInterpreter
 
 USE_RANDOM_MAP = False
 
@@ -39,6 +40,7 @@ def build_coordinator(seed: int | None = None) -> Coordinator:
     rules, applier, builder = SpellRules(), ActionApplier(), FrameBuilder()
     engine = SpellEngine(rules, default_effects(), applier)
     turns = TurnProcessor(SpellCastFactory(), engine, applier, ChaseAI(rules), rules)
+    interpreter = ActionInterpreter(applier, builder)
 
 
     def new_world() -> World:
@@ -65,7 +67,7 @@ def build_coordinator(seed: int | None = None) -> Coordinator:
 
     states = {
         StateId.MENU: MenuState(Menu()),
-        StateId.WORLD: WorldState(new_world, TurnManager(ChaseAI())),
+        StateId.WORLD: WorldState(new_world, turns, interpreter, builder),
         StateId.CUTSCENE: CutsceneState(
             Cutscene(lines=["Long ago...", "A magician set out.", "Press Enter to begin."])
         ),

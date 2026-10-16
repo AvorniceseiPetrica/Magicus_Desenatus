@@ -1,36 +1,52 @@
-from typing import Optional, Callable
+import copy
+from typing import Callable, Optional
+from models.objects.frame import WorldFrame
 from models.objects.world import World
-from business.application.commands import Command
-from business.application.world_logic.turn_manager import TurnManager
-from business.application.world_logic.world_rules import move_or_attack
+from business.application.commands import Command, Input, SpellRequest
+from business.application.playback.frame_builder import FrameBuilder
+from business.application.playback.interpreter import ActionInterpreter
+from business.application.world_logic.turn_processor import TurnProcessor
 from business.application.states.abstract_state import AbstractState, StateId
-
-_DIRECTIONS = {
-    Command.UP: (0, -1), Command.DOWN: (0, 1),
-    Command.LEFT: (-1, 0), Command.RIGHT: (1, 0),
-}
 
 
 class WorldState(AbstractState):
-    def __init__(self, new_world: Callable[[], World], turn_manager: TurnManager):
+    def __init__(self, new_world: Callable[[], World], turns: TurnProcessor,
+                 interpreter: ActionInterpreter, builder: FrameBuilder):
         self._new_world = new_world
+        self._turns, self._interpreter, self._builder = turns, interpreter, builder
         self._world = new_world()
-        self._turns = turn_manager
+        self._frame = self._idle()
 
     @property
-    def scene(self) -> World:
-        return self._world
+    def scene(self) -> WorldFrame:
+        return self._frame
 
-    def handle(self, command: Command) -> Optional[StateId]:
+    def handle(self, command: Input) -> Optional[StateId]:
+        if self._interpreter.is_playing:
+            return None  # input locked while playing
         if command is Command.CANCEL:
             return StateId.MENU
-        direction = _DIRECTIONS.get(command)
-        if direction is None:
-            return None
-        player = next((e for e in self._world.entities if e.is_player), None)
-        if player and move_or_attack(self._world, player, *direction):
-            self._turns.end_player_turn(self._world)
-            if not any(e.is_player for e in self._world.entities):  # player died
-                self._world = self._new_world()
-                return StateId.MENU
+        if isinstance(command, SpellRequest):
+            snapshot = copy.deepcopy(self._world)  # what the player sees right now
+            actions = self._turns.run_turn(self._world, command)  # logic is final immediately
+            self._interpreter.start(snapshot, actions)
+            if not actions:
+                self._frame = self._idle()
         return None
+
+    def update(self) -> Optional[StateId]:
+        if not self._interpreter.is_playing:
+            return None
+        frame = self._interpreter.next_frame()
+        if frame is not None:
+            self._frame = frame
+            return None
+        if self._world.player is None:  # playback over and the hero died
+            self._world = self._new_world()
+            self._frame = self._idle()
+            return StateId.MENU  # placeholder until a GAME_OVER state exists
+        self._frame = self._idle()
+        return None
+
+    def _idle(self) -> WorldFrame:
+        return self._builder.build(self._world, awaiting_input=True)

@@ -14,3 +14,7 @@ class Coordinator(GameInterface):
 
     def current_scene(self) -> Scene:
         return self._sm.scene
+
+    def tick(self) -> Scene:
+        return self._sm.tick()
+    

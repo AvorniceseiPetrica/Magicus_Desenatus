@@ -1,25 +1,31 @@
 from abc import ABC, abstractmethod
+from models.objects.elements import Direction
 from models.objects.entity import Entity
 from models.objects.world import World
-from business.application.world_logic.world_rules import move_or_attack
-
+from business.application.commands import SpellKind, SpellRequest
+from business.application.world_logic.spell.rules import SpellRules
 
 class EnemyAI(ABC):
     @abstractmethod
-    def act(self, enemy: Entity, world: World) -> None:
-        pass
-
+    def choose_spell(self, enemy: Entity, world: World) -> SpellRequest: ...
 
 class ChaseAI(EnemyAI):
-    """Steps one tile toward the player along the larger axis."""
+    """Shoots if the player is in a straight line and in range, otherwise steps toward them."""
+    def __init__(self, rules: SpellRules):
+        self._range = rules.directional_step
 
-    def act(self, enemy: Entity, world: World) -> None:
-        player = next((e for e in world.entities if e.is_player), None)
+    def choose_spell(self, enemy, world):
+        player = world.player
         if player is None:
-            return
+            return SpellRequest(enemy.affinity, SpellKind.SELF, ())
         dx, dy = player.x - enemy.x, player.y - enemy.y
-        if abs(dx) >= abs(dy):
-            step = (1 if dx > 0 else -1, 0)
-        else:
-            step = (0, 1 if dy > 0 else -1)
-        move_or_attack(world, enemy, *step)
+        if (dx == 0 or dy == 0) and abs(dx) + abs(dy) <= self._range:
+            return SpellRequest(enemy.affinity, SpellKind.DIRECTIONAL, (self._dir(dx, dy),))
+        horizontal = abs(dx) >= abs(dy)
+        step = self._dir(dx, 0) if horizontal else self._dir(0, dy)
+        return SpellRequest(enemy.affinity, SpellKind.SELF, (step,))
+
+    @staticmethod
+    def _dir(dx: int, dy: int) -> Direction:
+        if dx: return Direction.RIGHT if dx > 0 else Direction.LEFT
+        return Direction.DOWN if dy > 0 else Direction.UP

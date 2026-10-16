@@ -3,8 +3,10 @@ from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QWidget, QPushButton
 
 import settings
+from business.application.commands import SpellRequest
 from business.application.interfaces import GameInterface
 from business.application.world_logic.drawing_input import nearest_node, verify_duplicated_nodes
+from business.application.world_logic.path_comverter import path_to_directions
 from models.objects.grid import Grid
 from models.objects.menu import Menu
 from models.objects.world import World
@@ -13,6 +15,7 @@ from presentation.input_mapper import to_command
 from presentation.renderers.menu_renderer import MenuRenderer
 from presentation.renderers.world_renderer import WorldRenderer
 from presentation.renderers.cutscene_renderer import CutsceneRenderer
+from presentation.spell_selector import SpellSelector
 
 
 class MainWindow(QWidget):
@@ -24,14 +27,22 @@ class MainWindow(QWidget):
             World: WorldRenderer(),
             Cutscene: CutsceneRenderer(),
         }
+        self._selector = SpellSelector(self)
+        self._selector.setGeometry(10, 10, 340, 80)
         self._grid_buttons()
         self._drawing = False
         self.resize(settings.WINDOWED_TILE_SIZE * settings.GRID_COLUMNS,
                     settings.WINDOWED_TILE_SIZE * (settings.GRID_ROWS + settings.HUD_ROWS))
 
+        self._update_ui()
         self._anim_timer = QTimer(self)
-        self._anim_timer.timeout.connect(self.update)
-        self._anim_timer.start(16)
+        self._anim_timer.timeout.connect(self._on_tick)
+        self._anim_timer.start(settings.TICK_MS)
+
+    def _on_tick(self):
+        self._game.tick()  # asks WorldState for the next frame
+        self._update_ui()
+        self.update()
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_F11:
@@ -87,6 +98,11 @@ class MainWindow(QWidget):
             spell_grid.visited.append(node)
             self.update()
 
+    # TODO
+    # TODO
+    # TODO::::: THIS SHIT IS FUKED BEYOND REPAIR
+    # TODO
+    # TODO
     #Butoane pentru grid
     def _grid_buttons(self):
         self._btn_confirm = QPushButton("Confirm", self)
@@ -104,12 +120,19 @@ class MainWindow(QWidget):
 
     def _on_confirm(self):
         grid = self._get_grid()
-        if grid:
-            print (grid.visited)
+        if grid is None:
+            return
+        try:
+            directions = path_to_directions(grid.visited)
+        except ValueError:                         # diagonal or skipped node
+            self._on_reset()
+            return
+        self._game.handle_input(
+            SpellRequest(self._selector.affinity, self._selector.kind, directions))
+        grid.visited.clear()
 
     def _on_reset(self):
         grid = self._get_grid()
-        scene = self._game.current_scene()
-        if grid and isinstance(scene, World):
+        if grid:
             grid.visited.clear()
             self.update()

@@ -1,7 +1,14 @@
 import random
 
 import settings
+from business.application.playback.frame_builder import FrameBuilder
+from business.application.world_logic.action_applier import ActionApplier
 from business.application.world_logic.map_generator import generate_map
+from business.application.world_logic.spell.effects import default_effects
+from business.application.world_logic.spell.engine import SpellEngine
+from business.application.world_logic.spell.rules import SpellRules
+from business.application.world_logic.spell.spell_factory import SpellCastFactory
+from business.application.world_logic.turn_processor import TurnProcessor
 from models.objects.cutscene import Cutscene
 from models.objects.entity import Entity, EntityState
 from models.objects.menu import Menu
@@ -49,6 +56,11 @@ def build_coordinator(seed: int | None = None) -> Coordinator:
 
     assert (len(tiles[0]), len(tiles)) == (settings.GRID_COLUMNS, settings.GRID_ROWS), \
         "_LEVEL nu are dimensiunea din settings"
+
+    rules, applier, builder = SpellRules(), ActionApplier(), FrameBuilder()
+    engine = SpellEngine(rules, default_effects(), applier)
+    turns = TurnProcessor(SpellCastFactory(), engine, applier, ChaseAI(rules), rules)
+
 
     def new_world() -> World:
         return World(

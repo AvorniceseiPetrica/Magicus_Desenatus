@@ -1,10 +1,12 @@
 from pathlib import Path
 
-from PyQt5.QtCore import QRect, Qt
+from PyQt5.QtCore import QRect, Qt, QPointF, QRectF
 from PyQt5.QtGui import QColor, QPainter
 
 import settings
+from models.objects.elements import AffinityType
 from models.objects.entity import EntityState
+from models.objects.frame import EffectKind
 from models.objects.grid import Grid
 from models.objects.tile import TileType
 from models.objects.world import World
@@ -29,6 +31,8 @@ _TILE_SPRITES = {
 }
 assert set(_TILE_SPRITES) == set(TileType)
 
+_AFFINITY_COLORS = {AffinityType.FIRE: "#ff7a2f", AffinityType.WATER: "#3fa9ff",
+                    AffinityType.HOLY: "#ffe680", AffinityType.DARKNESS: "#9b59d0"}
 
 class WorldRenderer(Renderer):
     def __init__(self, decals: DecalCache | None = None):
@@ -73,6 +77,7 @@ class WorldRenderer(Renderer):
 
         painter.fillRect(lay.ox, lay.oy + scene.height * t,
                          scene.width * t, settings.HUD_ROWS * t, QColor("#1e1e24"))
+
 
         # entities
         now = time.monotonic() * 1000
@@ -125,3 +130,25 @@ class WorldRenderer(Renderer):
                 return frames[i]
         idle = e.sprites.get(EntityState.IDLE, ())
         return idle[int(now // FRAME_MS[EntityState.IDLE]) % len(idle)] if idle else ""
+
+    def _effect(self, painter, fx, lay):
+        t = lay.tile
+        px, py = lay.ox + fx.x * t, lay.oy + fx.y * t  # tile top-left in pixels
+        cx, cy = px + t / 2, py + t / 2
+        color = QColor(_AFFINITY_COLORS.get(fx.affinity, "#ffffff"))
+        if fx.kind is EffectKind.PROJECTILE:
+            painter.setPen(Qt.NoPen);
+            painter.setBrush(color)
+            painter.drawEllipse(QPointF(cx, cy), t * 0.17, t * 0.17)
+        elif fx.kind is EffectKind.BURST:
+            color.setAlphaF(0.6 * (1 - fx.progress))
+            painter.fillRect(QRectF(px, py, t, t), color)
+        elif fx.kind is EffectKind.FLASH:
+            color.setAlphaF(1 - fx.progress)
+            painter.setPen(color);
+            painter.setBrush(Qt.NoBrush)
+            r = t / 2 * (0.6 + fx.progress)
+            painter.drawEllipse(QPointF(cx, cy), r, r)
+        elif fx.kind is EffectKind.TEXT:
+            painter.setPen(Qt.white)
+            painter.drawText(QRectF(px - t / 2, py, 2 * t, t / 2), Qt.AlignCenter, fx.text)

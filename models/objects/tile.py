@@ -35,3 +35,9 @@ TILE_PROPS = {
 }
 
 assert set(TILE_PROPS) == set(TileType), "every TileType needs an entry in TILE_PROPS"
+
+WALKABLE = frozenset({
+    TileType.FLOOR_LIGHT_1, TileType.FLOOR_LIGHT_2,
+    TileType.FLOOR_DARK_1, TileType.FLOOR_DARK_2, TileType.FLOOR_DARK_3,
+})
+BLOCKS_SPELLS = frozenset({TileType.WALL, TileType.EMPTY})

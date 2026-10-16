@@ -1,3 +1,4 @@
+from math import floor, ceil
 from pathlib import Path
 
 from PyQt5.QtCore import QRect, Qt
@@ -8,6 +9,7 @@ from models.objects.entity import EntityState
 from models.objects.grid import Grid
 from models.objects.tile import TileType
 from models.objects.world import World
+from presentation.camera import camera_origin
 from presentation.layout import compute_layout
 from presentation.renderers.decal_cache import DecalCache
 from presentation.renderers.grid_renderer import GridRenderer
@@ -45,46 +47,50 @@ class WorldRenderer(Renderer):
         view = painter.viewport()
         lay = compute_layout(view.width(), view.height())
         t = lay.tile
+        vc, vr = lay.view_cols, settings.VIEW_ROWS
 
         painter.fillRect(view, QColor("#1e1e24"))
-
-        # zona din afara hărții: perete, aliniat la grila hărții
-        wall = self._decals.get(_TILE_SPRITES[TileType.WALL])
-        if wall:
-            for y in range(lay.oy % t - t, view.height(), t):
-                for x in range(lay.ox % t - t, view.width(), t):
-                    painter.drawPixmap(QRect(x, y, t, t), wall)
 
         font = painter.font()
         font.setPixelSize(max(8, t // 3))
         painter.setFont(font)
 
-        # map
+        # stare animații + poziții desenate (o singură dată pe cadru)
+        now = time.monotonic() * 1000
+        live = {id(e) for e in scene.entities}
+        self._slides = {k: v for k, v in self._slides.items() if k in live}
+        self._latched = {k: v for k, v in self._latched.items() if k in live}
+        pos = {id(e): self._drawn_pos(e, now) for e in scene.entities}
+
+        # cameră, în unități de tile
+        player = next((e for e in scene.entities if e.is_player), None)
+        fx, fy = pos[id(player)] if player else ((scene.width - 1) / 2, (scene.height - 1) / 2)
+        cam_x = camera_origin(fx, vc, scene.width)
+        cam_y = camera_origin(fy, vr, scene.height)
+
+        def to_px(gx: float, gy: float) -> tuple[int, int]:
+            return round((gx - cam_x) * t), round((gy - cam_y) * t)
+
+        painter.save()
+        painter.setClipRect(0, 0, view.width(), vr * t)
+
+        # map: doar dalele vizibile
         painter.setPen(QColor("#3a3a46"))
-        for gy, row in enumerate(scene.map):
-            for gx, tile in enumerate(row):
-                rect = QRect(lay.ox + gx * t, lay.oy + gy * t, t, t)
-                pixmap = self._decals.get(_TILE_SPRITES[tile])
+        for gy in range(max(0, floor(cam_y)), min(scene.height, ceil(cam_y + vr))):
+            for gx in range(max(0, floor(cam_x)), min(scene.width, ceil(cam_x + vc))):
+                rect = QRect(*to_px(gx, gy), t, t)
+                pixmap = self._decals.get(_TILE_SPRITES[scene.map[gy][gx]])
                 if pixmap:
                     painter.drawPixmap(rect, pixmap)
                 else:
                     painter.fillRect(rect, QColor("#ff00ff"))  # magenta = missing sprite
                     painter.drawRect(rect)
 
-        painter.fillRect(lay.ox, lay.oy + scene.height * t,
-                         scene.width * t, settings.HUD_ROWS * t, QColor("#1e1e24"))
-
         # entities
-        now = time.monotonic() * 1000
-        live = {id(e) for e in scene.entities}
-        self._slides = {k: v for k, v in self._slides.items() if k in live}
-        self._latched = {k: v for k, v in self._latched.items() if k in live}
-
         m = t // 24
         for e in scene.entities:
-            cx, cy = self._drawn_pos(e, now)
-            rect = QRect(lay.ox + round(cx * t) + m, lay.oy + round(cy * t) + m,
-                         t - 2 * m, t - 2 * m)
+            x, y = to_px(*pos[id(e)])
+            rect = QRect(x + m, y + m, t - 2 * m, t - 2 * m)
             pixmap = self._decals.get(self._frame(e, now))
             if pixmap:
                 painter.drawPixmap(rect, pixmap)
@@ -96,10 +102,12 @@ class WorldRenderer(Renderer):
             painter.drawText(rect.adjusted(0, 0, 0, -2), Qt.AlignBottom | Qt.AlignHCenter,
                              f"{e.hp}hp")
 
-        # HUD, sub hartă
+        painter.restore()
+
+        # HUD, sub viewport
+        painter.fillRect(0, vr * t, view.width(), view.height() - vr * t, QColor("#1e1e24"))
         painter.setPen(Qt.white)
-        painter.drawText(lay.ox + 8, lay.oy + scene.height * t + t // 2,
-                         f"Turn {scene.turn}   (Esc: menu)")
+        painter.drawText(8, vr * t + t // 2, f"Turn {scene.turn}   (Esc: menu)")
 
     def _drawn_pos(self, e, now):
         """Entity position in tile units (floats while sliding) and whether it is moving."""

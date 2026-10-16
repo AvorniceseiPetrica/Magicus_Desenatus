@@ -31,8 +31,8 @@ class MainWindow(QWidget):
         self._selector.setGeometry(10, 10, 340, 80)
         self._grid_buttons()
         self._drawing = False
-        self.resize(settings.WINDOWED_TILE_SIZE * settings.GRID_COLUMNS,
-                    settings.WINDOWED_TILE_SIZE * (settings.GRID_ROWS + settings.HUD_ROWS))
+        self.resize(settings.WINDOWED_TILE_SIZE * settings.VIEW_COLUMNS,
+                    settings.WINDOWED_TILE_SIZE * (settings.VIEW_ROWS + settings.HUD_ROWS))
 
         self._update_ui()
         self._anim_timer = QTimer(self)

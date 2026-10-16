@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from models.objects.tile import TileType
 
 # Each tile is written as a short code; tiles in a row are separated by spaces.
@@ -30,3 +32,7 @@ _SYMBOLS = {tile: code for code, tile in _TILE_CODES.items()}
 
 def map_to_text(tiles: list[list[TileType]]) -> list[str]:
     return [" ".join(_SYMBOLS[t] for t in row) for row in tiles]
+
+def map_from_file(path: Path) -> list[list[TileType]]:
+    rows = [line for line in path.read_text().splitlines() if line.strip()]
+    return map_from_text(rows)

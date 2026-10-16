@@ -8,8 +8,8 @@ from models.objects.tile import TileType, WALKABLE, BLOCKS_SPELLS
 
 @dataclass
 class World(Scene):
-    width: int = settings.GRID_COLUMNS
-    height: int = settings.GRID_ROWS
+    width: int = settings.VIEW_COLUMNS
+    height: int = settings.VIEW_ROWS
     entities: list[Entity] = field(default_factory=list)
     turn: int = 1
     map: list[list[TileType]] = field(default_factory=list)

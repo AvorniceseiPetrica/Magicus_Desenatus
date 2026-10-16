@@ -21,27 +21,9 @@ from business.application.states.abstract_state import StateId
 from business.application.states.menu_state import MenuState
 from business.application.states.world_state import WorldState
 from business.application.world_logic.turn_manager import TurnManager
-from business.application.world_logic.map_reader import map_from_text
+from business.application.world_logic.map_reader import map_from_file
 
 USE_RANDOM_MAP = False
-
-_LEVEL = [
-    "WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL",
-    "WAL FL2 FD3 FL1 FD3 FL2 FD3 FL1 FD3 FL2 FD3 FL1 FD3 FL2 FD3 FL1 FD3 FL2 FD3 FL1 FD3 FL2 FD3 FL1 WAL",
-    "WAL FD2 WAL WAL WAL WAL FL2 FD2 FL1 FD2 FL2 FD2 CHA CHA CHA FD2 FL1 FD2 FL2 FD2 WAL WAL WAL FD2 WAL",
-    "WAL FL2 WAL FL1 FD1 FL2 FD1 FL1 FD1 FL2 FD1 FL1 FD1 CHA CHA CHA FD1 FL2 FD1 FL1 FD1 FL2 FD1 FL1 WAL",
-    "WAL FD3 WAL FD3 FL1 WAL WAL WAL WAL FD3 FL2 FD3 FL1 CHA CHA CHA FL1 FD3 FL2 WAL WAL WAL WAL FD3 WAL",
-    "WAL FL2 WAL FL1 FD2 WAL FD2 FL1 FD2 FL2 FD2 FL1 FD2 FL2 FD2 FL1 FD2 FL2 FD2 FL1 WAL FL2 FD2 FL1 WAL",
-    "WAL FD1 FL2 FD1 FL1 WAL FL2 FD1 FL1 WAL WAL WAL WAL FD1 FL2 FD1 FL1 FD1 FL2 FD1 WAL FD1 FL2 FD1 WAL",
-    "WAL FL2 WAL WAL WAL WAL FD3 FL1 FD3 WAL FD3 FL1 WAL FL2 FD3 FL1 CHA CHA FD3 FL1 WAL FL2 WAL WAL WAL",
-    "WAL FD2 FL2 FD2 FL1 FD2 FL2 FD2 FL1 FD2 FL2 FD2 WAL FD2 FL2 FD2 CHA CHA FL2 FD2 FL1 FD2 FL2 FD2 WAL",
-    "WAL FL2 WAL WAL WAL FL2 FD1 FL1 FD1 WAL WAL WAL WAL FL2 FD1 FL1 FD1 FL2 FD1 FL1 FD1 FL2 FD1 FL1 WAL",
-    "WAL FD3 FL2 FD3 WAL FD3 FL2 FD3 FL1 FD3 FL2 FD3 CHA CHA CHA CHA FL1 FD3 WAL WAL WAL WAL FL2 FD3 WAL",
-    "WAL FL2 WAL FL1 WAL FL2 WAL WAL WAL WAL FD2 FL1 CHA CHA CHA CHA FD2 FL2 WAL FL1 FD2 FL2 FD2 FL1 WAL",
-    "WAL FD1 WAL FD1 FL1 FD1 FL2 FD1 FL1 FD1 WAL FD1 FL1 FD1 FL2 FD1 FL1 FD1 FL2 FD1 WAL FD1 WAL FD1 WAL",
-    "WAL FL2 FD3 FL1 FD3 FL2 WAL WAL WAL WAL WAL FL1 FD3 FL2 FD3 WAL FD3 FL2 FD3 FL1 FD3 FL2 FD3 WAL WAL",
-    "WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL WAL",
-]
 
 def build_coordinator(seed: int | None = None) -> Coordinator:
     if USE_RANDOM_MAP:
@@ -49,13 +31,10 @@ def build_coordinator(seed: int | None = None) -> Coordinator:
             seed = random.randrange(2 ** 32)
         print("map seed:", seed)
 
-        tiles = generate_map(settings.GRID_COLUMNS, settings.GRID_ROWS, seed)
+        tiles = generate_map(*settings.RANDOM_MAP_SIZE, seed)
 
     else:
-        tiles = map_from_text(_LEVEL)
-
-    assert (len(tiles[0]), len(tiles)) == (settings.GRID_COLUMNS, settings.GRID_ROWS), \
-        "_LEVEL nu are dimensiunea din settings"
+        tiles = map_from_file(settings.LEVELS_ROOT / settings.LEVEL)
 
     rules, applier, builder = SpellRules(), ActionApplier(), FrameBuilder()
     engine = SpellEngine(rules, default_effects(), applier)

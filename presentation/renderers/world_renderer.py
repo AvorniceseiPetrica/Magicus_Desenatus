@@ -3,6 +3,7 @@ from pathlib import Path
 from PyQt5.QtCore import QRect, Qt
 from PyQt5.QtGui import QColor, QPainter
 
+import settings
 from models.objects.entity import EntityState
 from models.objects.grid import Grid
 from models.objects.tile import TileType
@@ -13,17 +14,9 @@ from presentation.renderers.renderer import Renderer
 
 import time
 
-_MOVE_MS = 150
+from settings import SPRITES_ROOT, MOVE_MS, FRAME_MS
 
-_FRAME_MS = {
-    EntityState.IDLE: 300,
-    EntityState.MOVE: 75,
-    EntityState.ATTACK: 100,
-    EntityState.HURT: 100,
-}
-
-_TILE_SIZE = 48
-_SPRITES_ROOT = Path(__file__).resolve().parents[2] / "models" / "sprites"
+_TILE_SIZE = settings.WINDOWED_TILE_SIZE
 
 _TILE_SPRITES = {
     TileType.EMPTY: "other/empty.png",
@@ -40,7 +33,7 @@ assert set(_TILE_SPRITES) == set(TileType)
 
 class WorldRenderer(Renderer):
     def __init__(self, decals: DecalCache | None = None):
-        self._decals = decals or DecalCache(_SPRITES_ROOT)
+        self._decals = decals or DecalCache(SPRITES_ROOT)
         self._grid_renderer = GridRenderer(Grid())
         self._slides: dict[int, tuple] = {}
         self._latched: dict[int, tuple] = {}
@@ -95,8 +88,8 @@ class WorldRenderer(Renderer):
 
     def _drawn_pos(self, e, now):
         """Entity position in tile units (floats while sliding) and whether it is moving."""
-        fx, fy, tx, ty, t0 = self._slides.get(id(e), (e.x, e.y, e.x, e.y, now - _MOVE_MS))
-        k = min(1.0, (now - t0) / _MOVE_MS)
+        fx, fy, tx, ty, t0 = self._slides.get(id(e), (e.x, e.y, e.x, e.y, now - MOVE_MS))
+        k = min(1.0, (now - t0) / MOVE_MS)
         cx, cy = fx + (tx - fx) * k, fy + (ty - fy) * k
         if (e.x, e.y) != (tx, ty):  # moved since last frame: restart from where it is drawn now
             fx, fy, tx, ty, t0 = cx, cy, e.x, e.y, now
@@ -112,8 +105,8 @@ class WorldRenderer(Renderer):
             self._latched[id(e)] = latched
         frames = e.sprites.get(e.state, ())
         if e.state is not EntityState.IDLE and frames:
-            i = int((now - latched[1]) // _FRAME_MS[e.state])
+            i = int((now - latched[1]) // FRAME_MS[e.state])
             if i < len(frames):  # one-shot still playing
                 return frames[i]
         idle = e.sprites.get(EntityState.IDLE, ())
-        return idle[int(now // _FRAME_MS[EntityState.IDLE]) % len(idle)] if idle else ""
+        return idle[int(now // FRAME_MS[EntityState.IDLE]) % len(idle)] if idle else ""

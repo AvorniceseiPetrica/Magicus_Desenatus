@@ -1,5 +1,6 @@
 import random
 
+import settings
 from business.application.world_logic.map_generator import generate_map
 from models.objects.cutscene import Cutscene
 from models.objects.entity import Entity, EntityState
@@ -41,10 +42,13 @@ def build_coordinator(seed: int | None = None) -> Coordinator:
             seed = random.randrange(2 ** 32)
         print("map seed:", seed)
 
-        tiles = generate_map(25, 15, seed)
+        tiles = generate_map(settings.GRID_COLUMNS, settings.GRID_ROWS, seed)
 
     else:
         tiles = map_from_text(_LEVEL)
+
+    assert (len(tiles[0]), len(tiles)) == (settings.GRID_COLUMNS, settings.GRID_ROWS), \
+        "_LEVEL nu are dimensiunea din settings"
 
     def new_world() -> World:
         return World(

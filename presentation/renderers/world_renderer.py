@@ -17,8 +17,6 @@ import time
 
 from settings import SPRITES_ROOT, MOVE_MS, FRAME_MS
 
-_TILE_SIZE = settings.WINDOWED_TILE_SIZE
-
 _TILE_SPRITES = {
     TileType.EMPTY: "other/empty.png",
     TileType.FLOOR_LIGHT_1: "tiles/level1/floor_light_1.png",
@@ -50,6 +48,13 @@ class WorldRenderer(Renderer):
 
         painter.fillRect(view, QColor("#1e1e24"))
 
+        # zona din afara hărții: perete, aliniat la grila hărții
+        wall = self._decals.get(_TILE_SPRITES[TileType.WALL])
+        if wall:
+            for y in range(lay.oy % t - t, view.height(), t):
+                for x in range(lay.ox % t - t, view.width(), t):
+                    painter.drawPixmap(QRect(x, y, t, t), wall)
+
         font = painter.font()
         font.setPixelSize(max(8, t // 3))
         painter.setFont(font)
@@ -65,6 +70,9 @@ class WorldRenderer(Renderer):
                 else:
                     painter.fillRect(rect, QColor("#ff00ff"))  # magenta = missing sprite
                     painter.drawRect(rect)
+
+        painter.fillRect(lay.ox, lay.oy + scene.height * t,
+                         scene.width * t, settings.HUD_ROWS * t, QColor("#1e1e24"))
 
         # entities
         now = time.monotonic() * 1000

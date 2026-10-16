@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QWidget, QPushButton
 
@@ -11,7 +11,7 @@ from models.objects.world import World
 from models.objects.cutscene import Cutscene
 from presentation.input_mapper import to_command
 from presentation.renderers.menu_renderer import MenuRenderer
-from presentation.renderers.world_renderer import WorldRenderer, _TILE_SIZE
+from presentation.renderers.world_renderer import WorldRenderer
 from presentation.renderers.cutscene_renderer import CutsceneRenderer
 
 
@@ -34,6 +34,10 @@ class MainWindow(QWidget):
         self._anim_timer.start(16)
 
     def keyPressEvent(self, event):
+        if event.key() == Qt.Key_F11:
+            self.showNormal() if self.isFullScreen() else self.showFullScreen()
+            return
+
         command = to_command(event.key())
         if command:
             self._game.handle_input(command)

@@ -8,6 +8,7 @@ from models.objects.entity import EntityState
 from models.objects.grid import Grid
 from models.objects.tile import TileType
 from models.objects.world import World
+from presentation.layout import compute_layout
 from presentation.renderers.decal_cache import DecalCache
 from presentation.renderers.grid_renderer import GridRenderer
 from presentation.renderers.renderer import Renderer
@@ -43,14 +44,21 @@ class WorldRenderer(Renderer):
         return self._grid_renderer.spell_grid
 
     def render(self, painter: QPainter, scene: World) -> None:
-        painter.fillRect(painter.viewport(), QColor("#1e1e24"))
+        view = painter.viewport()
+        lay = compute_layout(view.width(), view.height())
+        t = lay.tile
 
+        painter.fillRect(view, QColor("#1e1e24"))
+
+        font = painter.font()
+        font.setPixelSize(max(8, t // 3))
+        painter.setFont(font)
 
         # map
         painter.setPen(QColor("#3a3a46"))
         for gy, row in enumerate(scene.map):
             for gx, tile in enumerate(row):
-                rect = QRect(gx * _TILE_SIZE, gy * _TILE_SIZE, _TILE_SIZE, _TILE_SIZE)
+                rect = QRect(lay.ox + gx * t, lay.oy + gy * t, t, t)
                 pixmap = self._decals.get(_TILE_SPRITES[tile])
                 if pixmap:
                     painter.drawPixmap(rect, pixmap)
@@ -59,16 +67,16 @@ class WorldRenderer(Renderer):
                     painter.drawRect(rect)
 
         # entities
-
         now = time.monotonic() * 1000
         live = {id(e) for e in scene.entities}
         self._slides = {k: v for k, v in self._slides.items() if k in live}
         self._latched = {k: v for k, v in self._latched.items() if k in live}
 
+        m = t // 24
         for e in scene.entities:
             cx, cy = self._drawn_pos(e, now)
-            rect = QRect(round(cx * _TILE_SIZE) + 2, round(cy * _TILE_SIZE) + 2,
-                         _TILE_SIZE - 4, _TILE_SIZE - 4)
+            rect = QRect(lay.ox + round(cx * t) + m, lay.oy + round(cy * t) + m,
+                         t - 2 * m, t - 2 * m)
             pixmap = self._decals.get(self._frame(e, now))
             if pixmap:
                 painter.drawPixmap(rect, pixmap)
@@ -79,12 +87,11 @@ class WorldRenderer(Renderer):
             painter.setPen(Qt.white)
             painter.drawText(rect.adjusted(0, 0, 0, -2), Qt.AlignBottom | Qt.AlignHCenter,
                              f"{e.hp}hp")
-        #desenam grid ul
-        #self._grid_renderer.render(painter, scene)
 
-        # HUD
+        # HUD, sub hartă
         painter.setPen(Qt.white)
-        painter.drawText(8, scene.height * _TILE_SIZE + 24, f"Turn {scene.turn}   (Esc: menu)")
+        painter.drawText(lay.ox + 8, lay.oy + scene.height * t + t // 2,
+                         f"Turn {scene.turn}   (Esc: menu)")
 
     def _drawn_pos(self, e, now):
         """Entity position in tile units (floats while sliding) and whether it is moving."""

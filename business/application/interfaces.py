@@ -11,3 +11,7 @@ class GameInterface(ABC):
     @abstractmethod
     def current_scene(self) -> Scene:
         pass
+
+    @abstractmethod
+    def tick(self) -> Scene:
+        pass

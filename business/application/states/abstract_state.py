@@ -21,3 +21,6 @@ class AbstractState(ABC):
     def handle(self, command: Command) -> Optional[StateId]:
         """Return a StateId to request a transition, or None to stay."""
         pass
+
+    def update(self) -> Optional[StateId]:
+        return None

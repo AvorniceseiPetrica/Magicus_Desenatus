@@ -28,6 +28,8 @@ FRAME_MS = {
     EntityState.HURT: 100,
 }
 
+TICK_MS = 16  # un tick de joc/animație (~60/s)
+
 # --- spell grid ---
 SPELL_CELL_SIZE = 60
 SPELL_PADDING = 10

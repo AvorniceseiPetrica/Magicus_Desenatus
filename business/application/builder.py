@@ -1,7 +1,14 @@
 import random
 
 import settings
+from business.application.playback.frame_builder import FrameBuilder
+from business.application.world_logic.action_applier import ActionApplier
 from business.application.world_logic.map_generator import generate_map
+from business.application.world_logic.spell.effects import default_effects
+from business.application.world_logic.spell.engine import SpellEngine
+from business.application.world_logic.spell.rules import SpellRules
+from business.application.world_logic.spell.spell_factory import SpellCastFactory
+from business.application.world_logic.turn_processor import TurnProcessor
 from models.objects.cutscene import Cutscene
 from models.objects.entity import Entity, EntityState
 from models.objects.menu import Menu
@@ -15,6 +22,7 @@ from business.application.states.menu_state import MenuState
 from business.application.states.world_state import WorldState
 from business.application.world_logic.turn_manager import TurnManager
 from business.application.world_logic.map_reader import map_from_file
+from business.application.playback.interpreter import ActionInterpreter
 
 USE_RANDOM_MAP = False
 
@@ -28,6 +36,12 @@ def build_coordinator(seed: int | None = None) -> Coordinator:
 
     else:
         tiles = map_from_file(settings.LEVELS_ROOT / settings.LEVEL)
+
+    rules, applier, builder = SpellRules(), ActionApplier(), FrameBuilder()
+    engine = SpellEngine(rules, default_effects(), applier)
+    turns = TurnProcessor(SpellCastFactory(), engine, applier, ChaseAI(rules), rules)
+    interpreter = ActionInterpreter(applier, builder)
+
 
     def new_world() -> World:
         return World(
@@ -53,7 +67,7 @@ def build_coordinator(seed: int | None = None) -> Coordinator:
 
     states = {
         StateId.MENU: MenuState(Menu()),
-        StateId.WORLD: WorldState(new_world, TurnManager(ChaseAI())),
+        StateId.WORLD: WorldState(new_world, turns, interpreter, builder),
         StateId.CUTSCENE: CutsceneState(
             Cutscene(lines=["Long ago...", "A magician set out.", "Press Enter to begin."])
         ),

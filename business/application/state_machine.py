@@ -17,3 +17,9 @@ class StateMachine:
     @property
     def scene(self) -> Scene:
         return self._current.scene
+
+    def tick(self) -> Scene:
+        next_id = self._current.update()
+        if next_id is not None:
+            self._current = self._states[next_id]
+        return self._current.scene

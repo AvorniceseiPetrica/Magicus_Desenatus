@@ -1,6 +1,8 @@
 from PyQt5.QtCore import QTimer
 from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QWidget, QPushButton
+
+import settings
 from business.application.interfaces import GameInterface
 from business.application.world_logic.drawing_input import nearest_node, verify_duplicated_nodes
 from models.objects.grid import Grid
@@ -24,7 +26,8 @@ class MainWindow(QWidget):
         }
         self._grid_buttons()
         self._drawing = False
-        self.resize(_TILE_SIZE * 25, _TILE_SIZE * 16)
+        self.resize(settings.WINDOWED_TILE_SIZE * settings.GRID_COLUMNS,
+                    settings.WINDOWED_TILE_SIZE * (settings.GRID_ROWS + settings.HUD_ROWS))
 
         self._anim_timer = QTimer(self)
         self._anim_timer.timeout.connect(self.update)

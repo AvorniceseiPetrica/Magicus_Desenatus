@@ -1,4 +1,6 @@
 from dataclasses import dataclass, field
+
+import settings
 from models.objects.entity import Entity
 from models.objects.scene import Scene
 from models.objects.tile import TileType
@@ -6,8 +8,8 @@ from models.objects.tile import TileType
 
 @dataclass
 class World(Scene):
-    width: int = 25
-    height: int = 15
+    width: int = settings.GRID_COLUMNS
+    height: int = settings.GRID_ROWS
     entities: list[Entity] = field(default_factory=list)
     turn: int = 1
     map: list[list[TileType]] = field(default_factory=list)

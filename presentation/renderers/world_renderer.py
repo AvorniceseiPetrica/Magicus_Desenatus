@@ -3,27 +3,21 @@ from pathlib import Path
 from PyQt5.QtCore import QRect, Qt
 from PyQt5.QtGui import QColor, QPainter
 
+import settings
 from models.objects.entity import EntityState
 from models.objects.grid import Grid
 from models.objects.tile import TileType
 from models.objects.world import World
+from presentation.layout import compute_layout
 from presentation.renderers.decal_cache import DecalCache
 from presentation.renderers.grid_renderer import GridRenderer
 from presentation.renderers.renderer import Renderer
 
 import time
 
-_MOVE_MS = 150
+from settings import SPRITES_ROOT, MOVE_MS, FRAME_MS
 
-_FRAME_MS = {
-    EntityState.IDLE: 300,
-    EntityState.MOVE: 75,
-    EntityState.ATTACK: 100,
-    EntityState.HURT: 100,
-}
-
-_TILE_SIZE = 48
-_SPRITES_ROOT = Path(__file__).resolve().parents[2] / "models" / "sprites"
+_TILE_SIZE = settings.WINDOWED_TILE_SIZE
 
 _TILE_SPRITES = {
     TileType.EMPTY: "other/empty.png",
@@ -40,7 +34,7 @@ assert set(_TILE_SPRITES) == set(TileType)
 
 class WorldRenderer(Renderer):
     def __init__(self, decals: DecalCache | None = None):
-        self._decals = decals or DecalCache(_SPRITES_ROOT)
+        self._decals = decals or DecalCache(SPRITES_ROOT)
         self._grid_renderer = GridRenderer(Grid())
         self._slides: dict[int, tuple] = {}
         self._latched: dict[int, tuple] = {}
@@ -50,14 +44,21 @@ class WorldRenderer(Renderer):
         return self._grid_renderer.spell_grid
 
     def render(self, painter: QPainter, scene: World) -> None:
-        painter.fillRect(painter.viewport(), QColor("#1e1e24"))
+        view = painter.viewport()
+        lay = compute_layout(view.width(), view.height())
+        t = lay.tile
 
+        painter.fillRect(view, QColor("#1e1e24"))
+
+        font = painter.font()
+        font.setPixelSize(max(8, t // 3))
+        painter.setFont(font)
 
         # map
         painter.setPen(QColor("#3a3a46"))
         for gy, row in enumerate(scene.map):
             for gx, tile in enumerate(row):
-                rect = QRect(gx * _TILE_SIZE, gy * _TILE_SIZE, _TILE_SIZE, _TILE_SIZE)
+                rect = QRect(lay.ox + gx * t, lay.oy + gy * t, t, t)
                 pixmap = self._decals.get(_TILE_SPRITES[tile])
                 if pixmap:
                     painter.drawPixmap(rect, pixmap)
@@ -66,16 +67,16 @@ class WorldRenderer(Renderer):
                     painter.drawRect(rect)
 
         # entities
-
         now = time.monotonic() * 1000
         live = {id(e) for e in scene.entities}
         self._slides = {k: v for k, v in self._slides.items() if k in live}
         self._latched = {k: v for k, v in self._latched.items() if k in live}
 
+        m = t // 24
         for e in scene.entities:
             cx, cy = self._drawn_pos(e, now)
-            rect = QRect(round(cx * _TILE_SIZE) + 2, round(cy * _TILE_SIZE) + 2,
-                         _TILE_SIZE - 4, _TILE_SIZE - 4)
+            rect = QRect(lay.ox + round(cx * t) + m, lay.oy + round(cy * t) + m,
+                         t - 2 * m, t - 2 * m)
             pixmap = self._decals.get(self._frame(e, now))
             if pixmap:
                 painter.drawPixmap(rect, pixmap)
@@ -86,17 +87,16 @@ class WorldRenderer(Renderer):
             painter.setPen(Qt.white)
             painter.drawText(rect.adjusted(0, 0, 0, -2), Qt.AlignBottom | Qt.AlignHCenter,
                              f"{e.hp}hp")
-        #desenam grid ul
-        #self._grid_renderer.render(painter, scene)
 
-        # HUD
+        # HUD, sub hartă
         painter.setPen(Qt.white)
-        painter.drawText(8, scene.height * _TILE_SIZE + 24, f"Turn {scene.turn}   (Esc: menu)")
+        painter.drawText(lay.ox + 8, lay.oy + scene.height * t + t // 2,
+                         f"Turn {scene.turn}   (Esc: menu)")
 
     def _drawn_pos(self, e, now):
         """Entity position in tile units (floats while sliding) and whether it is moving."""
-        fx, fy, tx, ty, t0 = self._slides.get(id(e), (e.x, e.y, e.x, e.y, now - _MOVE_MS))
-        k = min(1.0, (now - t0) / _MOVE_MS)
+        fx, fy, tx, ty, t0 = self._slides.get(id(e), (e.x, e.y, e.x, e.y, now - MOVE_MS))
+        k = min(1.0, (now - t0) / MOVE_MS)
         cx, cy = fx + (tx - fx) * k, fy + (ty - fy) * k
         if (e.x, e.y) != (tx, ty):  # moved since last frame: restart from where it is drawn now
             fx, fy, tx, ty, t0 = cx, cy, e.x, e.y, now
@@ -112,8 +112,8 @@ class WorldRenderer(Renderer):
             self._latched[id(e)] = latched
         frames = e.sprites.get(e.state, ())
         if e.state is not EntityState.IDLE and frames:
-            i = int((now - latched[1]) // _FRAME_MS[e.state])
+            i = int((now - latched[1]) // FRAME_MS[e.state])
             if i < len(frames):  # one-shot still playing
                 return frames[i]
         idle = e.sprites.get(EntityState.IDLE, ())
-        return idle[int(now // _FRAME_MS[EntityState.IDLE]) % len(idle)] if idle else ""
+        return idle[int(now // FRAME_MS[EntityState.IDLE]) % len(idle)] if idle else ""

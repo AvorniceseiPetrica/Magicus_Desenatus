@@ -38,3 +38,5 @@ SPRITES_ROOT = Path(__file__).resolve().parent / "models" / "sprites"
 
 LEVELS_ROOT = Path(__file__).resolve().parent / "models" / "levels"
 LEVEL = "level1.txt"
+
+CUTSCENE_ROOT = Path(__file__).resolve().parent / "models" / "cutscenes"

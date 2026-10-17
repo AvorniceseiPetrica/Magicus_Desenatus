@@ -9,7 +9,7 @@ from business.application.world_logic.spell.engine import SpellEngine
 from business.application.world_logic.spell.rules import SpellRules
 from business.application.world_logic.spell.spell_factory import SpellCastFactory
 from business.application.world_logic.turn_processor import TurnProcessor
-from models.objects.cutscene import Cutscene
+from models.objects.cutscene import Cutscene, loadCutscene
 from models.objects.entity import Entity, EntityState
 from models.objects.menu import Menu
 from models.objects.world import World
@@ -68,8 +68,6 @@ def build_coordinator(seed: int | None = None) -> Coordinator:
     states = {
         StateId.MENU: MenuState(Menu()),
         StateId.WORLD: WorldState(new_world, turns, interpreter, builder),
-        StateId.CUTSCENE: CutsceneState(
-            Cutscene(lines=["Long ago...", "A magician set out.", "Press Enter to begin."])
-        ),
+        StateId.CUTSCENE: CutsceneState(loadCutscene("scene1")),
     }
-    return Coordinator(StateMachine(states, StateId.MENU))
+    return Coordinator(StateMachine(states, StateId.CUTSCENE))

@@ -1,10 +1,13 @@
 {
   "elements": [
-    {"type":  "Image", "path": "img.png", "delay": 500, "width":  0.3},
-    {"type":  "Text", "text": "A long time ago...", "delay" : 1000, "position": [0, 0.3], "max_width": 0.3},
-    {"type":  "Image", "path": "img.png", "delay": 1000, "width":  0.6, "position": [0.33, 0]},
-    {"type":  "Text", "text": "A magician set out.", "delay" : 2000, "position": [0.5,0.5],"max_width": 0.1},
+    {"type":  "Image", "path": "img1.png", "delay": 500, "width":  0.38},
+    {"type":  "Text", "text": "A long time ago...", "delay" : 1000, "position": [0.1, 0.85], "max_width": 0.3},
+    {"type":  "Image", "path": "img2.png", "delay": 1000, "width":  0.58, "position": [0.4, 0.1]},
+    {"type":  "Text", "text": "In a place full of danger...", "delay" : 2000, "position": [0.62,0.7],"max_width": 2},
     {"type":  "Clear", "delay":  2000},
-    {"type":  "Text", "text": "Press Enter to begin.", "delay" : 20, "position": [0.4,0.8], "max_width": 0.9}
+    {"type":  "Image", "path": "magician_bg.png", "delay": 0, "width":  0.8, "position": [0.10, 0]},
+    {"type":  "Image", "path": "magician.png", "delay": 1000, "width":  0.8, "position": [0.10, 0]},
+    {"type":  "Text", "text": "A magician set out.", "delay" : 2000, "position": [0.4,0.2],"max_width": 1},
+    {"type":  "Text", "text": "Press Enter to begin.", "delay" : 5000, "position": [0.4,0.9], "max_width": 0.9}
   ]
 }

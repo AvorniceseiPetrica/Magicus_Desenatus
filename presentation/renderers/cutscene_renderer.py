@@ -1,5 +1,3 @@
-from operator import index
-
 from PyQt5.QtCore import QRect, Qt
 from PyQt5.QtGui import QColor, QPainter, QFont, QPixmap
 
@@ -8,6 +6,7 @@ from models.objects.cutscene import Cutscene, CutsceneClearScreen, CutsceneImage
 from presentation.renderers.renderer import Renderer
 
 FONT_HEIGHT_FRACTION = 0.035
+FADE_IN_TIME_MS = 500
 
 class CutsceneRenderer(Renderer):
     def __init__(self):
@@ -34,10 +33,15 @@ class CutsceneRenderer(Renderer):
                           if isinstance(obj, CutsceneClearScreen)), default=-1)
 
         for obj in scene.cutscene_objects[last_clear + 1:scene.index]:
+            if scene.cutscene_objects.index(obj) == scene.index-1:
+                painter.setOpacity(min(1.0, scene.time_last_shown / FADE_IN_TIME_MS))
+
             if isinstance(obj, CutsceneImage):
                 self._draw_image(painter, view, scene.cutscene_dir, obj)
             elif isinstance(obj, CutsceneTextBubble):
                 self._draw_bubble(painter, view, obj)
+
+            painter.setOpacity(1.0)
 
     def _draw_image(self, painter: QPainter, view: QRect,
                     folder: str, obj: CutsceneImage) -> None:

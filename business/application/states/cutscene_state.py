@@ -18,6 +18,7 @@ class CutsceneState(AbstractState):
             return self._finish()
         if command is Command.CONFIRM:
             self._cutscene.index += 1
+            self._cutscene.time_last_shown = 0
             if self._cutscene.index > len(self._cutscene.cutscene_objects):
                 return self._finish()
         return None

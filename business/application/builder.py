@@ -70,4 +70,4 @@ def build_coordinator(seed: int | None = None) -> Coordinator:
         StateId.WORLD: WorldState(new_world, turns, interpreter, builder),
         StateId.CUTSCENE: CutsceneState(loadCutscene("scene1")),
     }
-    return Coordinator(StateMachine(states, StateId.CUTSCENE))
+    return Coordinator(StateMachine(states, StateId.MENU))

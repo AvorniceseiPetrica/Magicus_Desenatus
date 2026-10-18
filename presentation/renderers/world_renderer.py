@@ -77,7 +77,7 @@ class WorldRenderer(Renderer):
         def to_px(gx: float, gy: float) -> tuple[int, int]:
             return round((gx - cam_x) * t), round((gy - cam_y) * t)
 
-        game_width = view.width() - settings.SPELL_PANEL_WIDTH
+        game_width = view.width() - lay.spell_panel_width
         painter.save()
         painter.setClipRect(0, 0, game_width, lay.hud_y)
 
@@ -119,16 +119,20 @@ class WorldRenderer(Renderer):
 
 
         # HUD, sub viewport
-        painter.fillRect(0, lay.hud_y, view.width(), view.height() - lay.hud_y, QColor("#3b2008"))
+        painter.fillRect(0, lay.hud_y, view.width(), lay.hud_height, QColor("#3b2008"))
         painter.fillRect(game_width + 3, 0, view.width() - game_width - 3, lay.hud_y, QColor("#3b2008"))
 
 
         # gridul pentru spell in stanga jos
         #260 = padding + 4 * cell_size + padding
 
+
+        grid_pixel_size = settings.SPELL_PADDING + 4 * lay.spell_cell_size + settings.SPELL_PADDING
+        self._grid_renderer.cell_size = lay.spell_cell_size
         self._grid_renderer.offset_x = settings.SPELL_PADDING
-        self._grid_renderer.offset_y = lay.hud_y + (settings.HUD_HEIGHT - 260) // 2
+        self._grid_renderer.offset_y = lay.hud_y + (lay.hud_height - grid_pixel_size) // 2
         self._grid_renderer.render(painter, scene)
+
 
         painter.setPen(Qt.white)
         painter.drawText(8, lay.hud_y + t // 2, f"Turn {scene.turn}   (Esc: menu)")

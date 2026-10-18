@@ -19,9 +19,11 @@ HUD_ROWS = 1               # rânduri de tile rezervate sub hartă
 WINDOWED_TILE_SIZE = 48    # mărimea tile-ului când rulează în fereastră
 MIN_TILE_SIZE = 32         # sub asta fereastra nu mai poate fi micșorată
 
-HUD_HEIGHT = 280  # pixeli zona jos
-SPELL_PANEL_WIDTH = 280 # partea din dreapta
+SPELL_PANEL_RATIO = 0.18    #partea din dreapta de Hud
+MIN_SPELL_PANEL_WIDTH = 120
 
+HUD_RATIO = 0.28            #partea de jos de Hud
+MIN_HUD_HEIGHT = 160
 
 # --- animații (ms) ---
 MOVE_MS = 150

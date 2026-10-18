@@ -6,8 +6,10 @@ import settings
 class Layout:
     tile: int
     view_cols: float  # câte coloane încap în lățimea ferestrei (fracționar)
-
+    hud_y: int
 
 def compute_layout(width: int, height: int) -> Layout:
-    tile = max(1, height // (settings.VIEW_ROWS + settings.HUD_ROWS))
-    return Layout(tile, width / tile)
+    game_h = max(1, height - settings.HUD_HEIGHT)
+    tile = max(1, game_h // settings.VIEW_ROWS)
+    hud_y = tile * settings.VIEW_ROWS
+    return Layout(tile, width / tile, hud_y)

@@ -2,7 +2,7 @@ from math import floor, ceil
 from pathlib import Path
 
 from PyQt5.QtCore import QRect, Qt, QPointF, QRectF
-from PyQt5.QtGui import QColor, QPainter
+from PyQt5.QtGui import QColor, QPainter, QPen
 
 import settings
 from models.objects.elements import AffinityType
@@ -76,8 +76,9 @@ class WorldRenderer(Renderer):
         def to_px(gx: float, gy: float) -> tuple[int, int]:
             return round((gx - cam_x) * t), round((gy - cam_y) * t)
 
+        game_width = view.width() - settings.SPELL_PANEL_WIDTH
         painter.save()
-        painter.setClipRect(0, 0, view.width(), vr * t)
+        painter.setClipRect(0, 0, game_width, lay.hud_y)
 
         # map: doar dalele vizibile
         painter.setPen(QColor("#3a3a46"))
@@ -109,10 +110,16 @@ class WorldRenderer(Renderer):
 
         painter.restore()
 
+        painter.setPen(QPen(QColor("#8b6914"), 3))
+        painter.drawLine(0, lay.hud_y, view.width(), lay.hud_y)  # border jos
+        painter.drawLine(game_width, 0, game_width, lay.hud_y)  # border dreapta
+
         # HUD, sub viewport
-        painter.fillRect(0, vr * t, view.width(), view.height() - vr * t, QColor("#1e1e24"))
+        painter.fillRect(0, lay.hud_y, view.width(), view.height() - lay.hud_y, QColor("#3b2008"))
+        painter.fillRect(game_width + 3, 0, view.width() - game_width - 3, lay.hud_y, QColor("#3b2008"))
+
         painter.setPen(Qt.white)
-        painter.drawText(8, vr * t + t // 2, f"Turn {scene.turn}   (Esc: menu)")
+        painter.drawText(8, lay.hud_y + t // 2, f"Turn {scene.turn}   (Esc: menu)")
 
     def _drawn_pos(self, e, now):
         """Entity position in tile units (floats while sliding) and whether it is moving."""

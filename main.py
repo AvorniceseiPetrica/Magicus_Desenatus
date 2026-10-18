@@ -8,5 +8,5 @@ from presentation.main_window import MainWindow
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow(build_coordinator())
-    window.showFullScreen() if settings.FULLSCREEN else window.show()
+    window.showFullScreen() if settings.FULLSCREEN else window.showMaximized()
     sys.exit(app.exec_())

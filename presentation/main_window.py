@@ -115,7 +115,7 @@ class MainWindow(QWidget):
         if spell_grid is None:
             return
 
-        node = nearest_node(spell_grid, event.pos(), self._grid_cell_size, settings.SPELL_PADDING, self._grid_origin_x, self._grid_origin_y)
+        node = nearest_node(spell_grid, event.pos(), self._grid_cell_size, settings.SPELL_PADDING, self._grid_origin_x, self._grid_origin_y, threshold=self._grid_cell_size // 2)
         if node and verify_duplicated_nodes(spell_grid, node):
             spell_grid.visited.append(node)
             self.update()

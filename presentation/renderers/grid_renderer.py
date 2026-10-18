@@ -6,11 +6,14 @@ from models.objects.scene import Scene
 from presentation.renderers.renderer import Renderer
 
 
+
 class GridRenderer(Renderer):
-    def __init__(self, spell_grid:Grid , cell_size: int = 60, padding: int = 10):
+    def __init__(self, spell_grid:Grid, cell_size = 60, padding: int = 10):
         self.cell_size = cell_size
         self.padding = padding
         self.spell_grid = spell_grid
+        self.offset_x: int = 0
+        self.offset_y: int = 0
 
 
     def render(self, painter: QPainter, scene: Scene) -> None:
@@ -33,8 +36,8 @@ class GridRenderer(Renderer):
 
     def _to_screen(self, x: int, y: int) -> QPoint:
         return QPoint(
-            self.padding + x * self.cell_size,
-            self.padding + y * self.cell_size
+            self.offset_x + self.padding + x * self.cell_size,
+            self.offset_y + self.padding + y * self.cell_size
         )
 
 

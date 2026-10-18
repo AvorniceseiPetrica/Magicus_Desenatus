@@ -13,6 +13,7 @@ from models.objects.tile import TileType
 from models.objects.world import World
 from presentation.camera import camera_origin
 from presentation.layout import compute_layout
+from presentation.renderers import grid_renderer
 from presentation.renderers.decal_cache import DecalCache
 from presentation.renderers.grid_renderer import GridRenderer
 from presentation.renderers.renderer import Renderer
@@ -114,9 +115,20 @@ class WorldRenderer(Renderer):
         painter.drawLine(0, lay.hud_y, view.width(), lay.hud_y)  # border jos
         painter.drawLine(game_width, 0, game_width, lay.hud_y)  # border dreapta
 
+
+
+
         # HUD, sub viewport
         painter.fillRect(0, lay.hud_y, view.width(), view.height() - lay.hud_y, QColor("#3b2008"))
         painter.fillRect(game_width + 3, 0, view.width() - game_width - 3, lay.hud_y, QColor("#3b2008"))
+
+
+        # gridul pentru spell in stanga jos
+        #260 = padding + 4 * cell_size + padding
+
+        self._grid_renderer.offset_x = settings.SPELL_PADDING
+        self._grid_renderer.offset_y = lay.hud_y + (settings.HUD_HEIGHT - 260) // 2
+        self._grid_renderer.render(painter, scene)
 
         painter.setPen(Qt.white)
         painter.drawText(8, lay.hud_y + t // 2, f"Turn {scene.turn}   (Esc: menu)")

@@ -12,6 +12,7 @@ from models.objects.menu import Menu
 from models.objects.frame import WorldFrame
 from models.objects.cutscene import Cutscene
 from presentation.input_mapper import to_command
+from presentation.layout import compute_layout
 from presentation.renderers.menu_renderer import MenuRenderer
 from presentation.renderers.world_renderer import WorldRenderer
 from presentation.renderers.cutscene_renderer import CutsceneRenderer
@@ -38,6 +39,10 @@ class MainWindow(QWidget):
         self._anim_timer = QTimer(self)
         self._anim_timer.timeout.connect(self._on_tick)
         self._anim_timer.start(settings.TICK_MS)
+
+        self._grid_origin_x = settings.SPELL_PADDING
+        self._grid_origin_y = 0
+        self._recalc_grid_origin()
 
     def _on_tick(self):
         self._game.tick()  # asks WorldState for the next frame
@@ -66,6 +71,11 @@ class MainWindow(QWidget):
         #Loc pentru alte butoane
         #TODO
 
+    # apelat de fiecare data cand se face resize la window
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self._recalc_grid_origin()
+
     def paintEvent(self, _):
         scene = self._game.current_scene()
         painter = QPainter(self)
@@ -76,6 +86,12 @@ class MainWindow(QWidget):
         if isinstance(scene, WorldFrame):
             return self._renderers[WorldFrame].spell_grid
         return None
+
+    def _recalc_grid_origin(self):
+        from presentation.layout import compute_layout
+        lay = compute_layout(self.width(), self.height())
+        self._grid_origin_x = settings.SPELL_PADDING
+        self._grid_origin_y = lay.hud_y + (settings.HUD_HEIGHT - 260) // 2
 
     #Event uri pentru grid ul de desenat
     def mousePressEvent(self, event):
@@ -93,7 +109,15 @@ class MainWindow(QWidget):
 
         if spell_grid is None:
             return
-        node = nearest_node(spell_grid, event.pos(), cell_size=60, padding=10)
+
+        from presentation.layout import compute_layout
+
+        lay = compute_layout(self.width(), self.height())
+        self._grid_origin_x = settings.SPELL_PADDING
+        self._grid_origin_y = lay.hud_y + (settings.HUD_HEIGHT - 260) // 2
+
+        node = nearest_node(spell_grid, event.pos(), settings.SPELL_CELL_SIZE, settings.SPELL_PADDING, self._grid_origin_x, self._grid_origin_y)
+
         if node and verify_duplicated_nodes(spell_grid, node):
             spell_grid.visited.append(node)
             self.update()

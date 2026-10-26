@@ -34,6 +34,9 @@ _TILE_SPRITES = {
 }
 assert set(_TILE_SPRITES) == set(TileType)
 
+_HUD_BG = QColor("#3b2008")
+_HUD_BORDER = QColor("#8b6914")
+
 _AFFINITY_COLORS = {AffinityType.FIRE: "#ff7a2f", AffinityType.WATER: "#3fa9ff",
                     AffinityType.HOLY: "#ffe680", AffinityType.DARKNESS: "#9b59d0"}
 
@@ -77,10 +80,6 @@ class WorldRenderer(Renderer):
         def to_px(gx: float, gy: float) -> tuple[int, int]:
             return round((gx - cam_x) * t), round((gy - cam_y) * t)
 
-        game_width = view.width() - lay.spell_panel_width
-        painter.save()
-        painter.setClipRect(0, 0, game_width, lay.hud_y)
-
         # map: doar dalele vizibile
         painter.setPen(QColor("#3a3a46"))
         for gy in range(max(0, floor(cam_y)), min(scene.height, ceil(cam_y + vr))):
@@ -109,33 +108,27 @@ class WorldRenderer(Renderer):
             painter.drawText(rect.adjusted(0, 0, 0, -2), Qt.AlignBottom | Qt.AlignHCenter,
                              f"{e.hp}hp")
 
-        painter.restore()
-
-        painter.setPen(QPen(QColor("#8b6914"), 3))
-        painter.drawLine(0, lay.hud_y, view.width(), lay.hud_y)  # border jos
-        painter.drawLine(game_width, 0, game_width, lay.hud_y)  # border dreapta
-
-
-
-
-        # HUD, sub viewport
-        painter.fillRect(0, lay.hud_y, view.width(), lay.hud_height, QColor("#3b2008"))
-        painter.fillRect(game_width + 3, 0, view.width() - game_width - 3, lay.hud_y, QColor("#3b2008"))
-
-
-        # gridul pentru spell in stanga jos
-        #260 = padding + 4 * cell_size + padding
-
-
-        grid_pixel_size = settings.SPELL_PADDING + 4 * lay.spell_cell_size + settings.SPELL_PADDING
+        # gridul pentru spell, deocamdată în stânga-jos, peste hartă
         self._grid_renderer.cell_size = lay.spell_cell_size
-        self._grid_renderer.offset_x = settings.SPELL_PADDING
-        self._grid_renderer.offset_y = lay.hud_y + (lay.hud_height - grid_pixel_size) // 2
+        self._grid_renderer.offset_x = lay.grid_x
+        self._grid_renderer.offset_y = lay.grid_y
         self._grid_renderer.render(painter, scene)
 
+        # HUD-ul din dreapta, peste hartă (harta NU se micșorează sub el)
+        self._draw_side_hud(painter, lay, view.height(), scene)
+
+    def _draw_side_hud(self, painter: QPainter, lay, height: int, scene) -> None:
+        x, w = lay.spell_panel_x, lay.spell_panel_width
+        painter.fillRect(x, 0, w, height, _HUD_BG)
+        painter.setPen(QPen(_HUD_BORDER, 3))
+        painter.drawLine(x, 0, x, height)
 
         painter.setPen(Qt.white)
-        painter.drawText(8, lay.hud_y + t // 2, f"Turn {scene.turn}   (Esc: menu)")
+        line_h = lay.tile // 2
+        painter.drawText(QRect(x + 12, 8, w - 24, line_h), Qt.AlignLeft | Qt.AlignVCenter,
+                         f"Turn {scene.turn}")
+        painter.drawText(QRect(x + 12, 8 + line_h, w - 24, line_h), Qt.AlignLeft | Qt.AlignVCenter,
+                         "Esc: menu")
 
     def _drawn_pos(self, e, now):
         """Entity position in tile units (floats while sliding) and whether it is moving."""

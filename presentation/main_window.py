@@ -33,9 +33,8 @@ class MainWindow(QWidget):
         self._grid_buttons()
         self._drawing = False
 
-        default_h = settings.WINDOWED_TILE_SIZE * settings.VIEW_ROWS
         self.resize(settings.WINDOWED_TILE_SIZE * settings.VIEW_COLUMNS,
-                    int(default_h / (1 - settings.HUD_RATIO)))
+                    settings.WINDOWED_TILE_SIZE * settings.VIEW_ROWS)
 
         self._update_ui()
         self._anim_timer = QTimer(self)
@@ -91,11 +90,9 @@ class MainWindow(QWidget):
 
 
     def _recalc_grid_origin(self):
-        from presentation.layout import compute_layout
-        lay = compute_layout(self.width(), self.height())
-        grid_pixel_size = settings.SPELL_PADDING + 4 * lay.spell_cell_size + settings.SPELL_PADDING
-        self._grid_origin_x = settings.SPELL_PADDING
-        self._grid_origin_y = lay.hud_y + (lay.hud_height - grid_pixel_size) // 2
+        lay = compute_layout(self.width(), self.height())  # aceeași sursă ca WorldRenderer
+        self._grid_origin_x = lay.grid_x
+        self._grid_origin_y = lay.grid_y
         self._grid_cell_size = lay.spell_cell_size
 
     #Event uri pentru grid ul de desenat

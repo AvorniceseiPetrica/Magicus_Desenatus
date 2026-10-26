@@ -36,6 +36,10 @@ assert set(_TILE_SPRITES) == set(TileType)
 
 _HUD_BG = QColor("#3b2008")
 _HUD_BORDER = QColor("#8b6914")
+_SLOT_BG = QColor("#2b2b2e")
+_SLOT_EDGE = QColor("#121214")
+_SLOT_NUMBER = QColor("#9a9aa0")
+_BOOK_BG = QColor("#1f3a6e")
 
 _AFFINITY_COLORS = {AffinityType.FIRE: "#ff7a2f", AffinityType.WATER: "#3fa9ff",
                     AffinityType.HOLY: "#ffe680", AffinityType.DARKNESS: "#9b59d0"}
@@ -123,12 +127,35 @@ class WorldRenderer(Renderer):
         painter.setPen(QPen(_HUD_BORDER, 3))
         painter.drawLine(x, 0, x, height)
 
+        painter.save()
+        font = painter.font()
+        font.setPixelSize(lay.hud_font_px)
+        painter.setFont(font)
+
         painter.setPen(Qt.white)
-        line_h = lay.tile // 2
-        painter.drawText(QRect(x + 12, 8, w - 24, line_h), Qt.AlignLeft | Qt.AlignVCenter,
-                         f"Turn {scene.turn}")
-        painter.drawText(QRect(x + 12, 8 + line_h, w - 24, line_h), Qt.AlignLeft | Qt.AlignVCenter,
-                         "Esc: menu")
+        info = QRect(*lay.info_rect)
+        painter.drawText(info, Qt.AlignLeft | Qt.AlignTop, f"Turn {scene.turn}")
+        painter.drawText(info, Qt.AlignLeft | Qt.AlignBottom, "Esc: menu")
+
+        # Confirm / Reset sunt QPushButton-uri, poziționate de MainWindow pe lay.confirm_rect / reset_rect
+
+        # sloturile de vrăji (goale deocamdată)
+        for i, r in enumerate(lay.spell_slots, start=1):
+            self._draw_slot(painter, QRect(*r), _SLOT_BG, str(i))
+
+        # spațiul pentru carte (bestiar / vrăji / lore), colțul dreapta-jos
+        self._draw_slot(painter, QRect(*lay.book_rect), _BOOK_BG)
+        painter.restore()
+
+    @staticmethod
+    def _draw_slot(painter: QPainter, rect: QRect, bg: QColor, number: str = "") -> None:
+        painter.fillRect(rect, bg)
+        painter.setPen(QPen(_SLOT_EDGE, 2))
+        painter.setBrush(Qt.NoBrush)
+        painter.drawRect(rect)
+        if number:
+            painter.setPen(_SLOT_NUMBER)
+            painter.drawText(rect.adjusted(4, 2, 0, 0), Qt.AlignLeft | Qt.AlignTop, number)
 
     def _drawn_pos(self, e, now):
         """Entity position in tile units (floats while sliding) and whether it is moving."""

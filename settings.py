@@ -18,8 +18,10 @@ GRID_ROWS = 15
 WINDOWED_TILE_SIZE = 48    # mărimea tile-ului când rulează în fereastră
 MIN_TILE_SIZE = 32         # sub asta fereastra nu mai poate fi micșorată
 
-SPELL_PANEL_RATIO = 0.18    # HUD-ul din dreapta, desenat peste hartă
-MIN_SPELL_PANEL_WIDTH = 120
+# --- HUD dreapta, desenat peste hartă (px) ---
+SPELL_SLOTS = 6             # câte sloturi de vrăji se văd în HUD
+HUD_MARGIN = 12             # marginea interioară a panoului
+HUD_GAP = 6                 # spațiul dintre sloturi / butoane
 
 # --- animații (ms) ---
 MOVE_MS = 150

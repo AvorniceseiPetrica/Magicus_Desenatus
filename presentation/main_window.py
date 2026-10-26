@@ -44,6 +44,7 @@ class MainWindow(QWidget):
         self._grid_origin_x = settings.SPELL_PADDING
         self._grid_origin_y = 0
         self._recalc_grid_origin()
+        self._place_hud_buttons()
 
     def _on_tick(self):
         self._game.tick()  # asks WorldState for the next frame
@@ -76,6 +77,7 @@ class MainWindow(QWidget):
     def resizeEvent(self, event):
         super().resizeEvent(event)
         self._recalc_grid_origin()
+        self._place_hud_buttons()
 
     def paintEvent(self, _):
         scene = self._game.current_scene()
@@ -94,6 +96,15 @@ class MainWindow(QWidget):
         self._grid_origin_x = lay.grid_x
         self._grid_origin_y = lay.grid_y
         self._grid_cell_size = lay.spell_cell_size
+
+    def _place_hud_buttons(self):
+        lay = compute_layout(self.width(), self.height())
+        self._btn_confirm.setGeometry(*lay.confirm_rect)
+        self._btn_reset.setGeometry(*lay.reset_rect)
+        for btn in (self._btn_confirm, self._btn_reset):
+            font = btn.font()
+            font.setPixelSize(lay.hud_font_px)
+            btn.setFont(font)
 
     #Event uri pentru grid ul de desenat
     def mousePressEvent(self, event):
@@ -117,11 +128,6 @@ class MainWindow(QWidget):
             spell_grid.visited.append(node)
             self.update()
 
-    # TODO
-    # TODO
-    # TODO::::: THIS SHIT IS FUKED BEYOND REPAIR
-    # TODO
-    # TODO
     #Butoane pentru grid
     def _grid_buttons(self):
         self._btn_confirm = QPushButton("Confirm", self)
@@ -132,10 +138,6 @@ class MainWindow(QWidget):
 
         self._btn_confirm.setVisible(False)
         self._btn_reset.setVisible(False)
-
-        #pozitionarea butoanelor
-        self._btn_confirm.setGeometry(360, 10, 100, 36)
-        self._btn_reset.setGeometry(360, 56, 100, 36)
 
         self._btn_confirm.setFocusPolicy(Qt.NoFocus)
         self._btn_reset.setFocusPolicy(Qt.NoFocus)

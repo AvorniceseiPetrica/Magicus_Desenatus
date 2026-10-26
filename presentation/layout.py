@@ -10,9 +10,6 @@ class Layout:
     view_cols: float  # câte coloane încap în lățimea ferestrei (fracționar)
     spell_panel_x: int  # marginea stângă a HUD-ului din dreapta
     spell_panel_width: int
-    spell_cell_size: int
-    grid_x: int  # originea grilei de desenat (stânga-sus, înainte de padding)
-    grid_y: int
     # --- HUD dreapta: o singură coloană, toate pătratele au aceeași latură ---
     info_rect: Rect  # tura curentă + hint
     spell_slots: tuple[Rect, ...]  # de sus în jos
@@ -26,16 +23,9 @@ def compute_layout(width: int, height: int) -> Layout:
     # harta ocupă toată fereastra; HUD-ul și grila sunt desenate peste ea
     tile = max(1, height // settings.VIEW_ROWS)
 
-    # grila 5x5 rămâne deocamdată în stânga-jos: padding + 4*cell + padding
-    spell_cell_size = settings.SPELL_CELL_SIZE
-    grid_size = 2 * settings.SPELL_PADDING + 4 * spell_cell_size
-    grid_x = settings.SPELL_PADDING
-    grid_y = height - grid_size - settings.SPELL_PADDING
-
     panel_x, panel_w, info, slots, confirm, reset, book = _side_hud(width, height, tile)
 
     return Layout(tile, width / tile, panel_x, panel_w,
-                  spell_cell_size, grid_x, grid_y,
                   info, slots, confirm, reset, book, max(8, info[2] // 5))
 
 

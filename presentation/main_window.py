@@ -41,9 +41,6 @@ class MainWindow(QWidget):
         self._anim_timer.timeout.connect(self._on_tick)
         self._anim_timer.start(settings.TICK_MS)
 
-        self._grid_origin_x = settings.SPELL_PADDING
-        self._grid_origin_y = 0
-        self._recalc_grid_origin()
         self._place_hud_buttons()
 
     def _on_tick(self):
@@ -76,8 +73,10 @@ class MainWindow(QWidget):
     # apelat de fiecare data cand se face resize la window
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        self._recalc_grid_origin()
         self._place_hud_buttons()
+        view = self._renderers[WorldFrame].grid_view
+        if view.visible:  # grila rămâne în fereastră după resize
+            self._place_grid(view.offset_x + view.size // 2, view.offset_y + view.size // 2)
 
     def paintEvent(self, _):
         scene = self._game.current_scene()
@@ -91,11 +90,10 @@ class MainWindow(QWidget):
         return None
 
 
-    def _recalc_grid_origin(self):
-        lay = compute_layout(self.width(), self.height())  # aceeași sursă ca WorldRenderer
-        self._grid_origin_x = lay.grid_x
-        self._grid_origin_y = lay.grid_y
-        self._grid_cell_size = lay.spell_cell_size
+    def _place_grid(self, cx: int, cy: int):
+        """Centrează grila pe (cx, cy), fără să intre sub HUD-ul din dreapta."""
+        lay = compute_layout(self.width(), self.height())
+        self._renderers[WorldFrame].grid_view.place_at(cx, cy, lay.spell_panel_x, self.height())
 
     def _place_hud_buttons(self):
         lay = compute_layout(self.width(), self.height())
@@ -107,13 +105,22 @@ class MainWindow(QWidget):
             btn.setFont(font)
 
     #Event uri pentru grid ul de desenat
+    # click dreapta: grila apare / se mută la cursor
+    # click stânga + tragere: desenează pe grilă (doar dacă grila e vizibilă)
     def mousePressEvent(self, event):
-        if not self._drawing:
+        if self._get_grid() is None:
+            return
+        view = self._renderers[WorldFrame].grid_view
+        if event.button() == Qt.RightButton and not self._drawing:
+            self._place_grid(event.pos().x(), event.pos().y())
+            self.update()
+        elif event.button() == Qt.LeftButton and view.visible and not self._drawing:
             self._on_reset()
             self._drawing = True
 
     def mouseReleaseEvent(self, event):
-        self._drawing = False
+        if event.button() == Qt.LeftButton:
+            self._drawing = False
 
     def mouseMoveEvent(self, event):
         if not self._drawing:
@@ -123,7 +130,9 @@ class MainWindow(QWidget):
         if spell_grid is None:
             return
 
-        node = nearest_node(spell_grid, event.pos(), self._grid_cell_size, settings.SPELL_PADDING, self._grid_origin_x, self._grid_origin_y, threshold=self._grid_cell_size // 2)
+        view = self._renderers[WorldFrame].grid_view
+        node = nearest_node(spell_grid, event.pos(), view.cell_size, view.padding,
+                            view.offset_x, view.offset_y, threshold=view.cell_size // 2)
         if node and verify_duplicated_nodes(spell_grid, node):
             spell_grid.visited.append(node)
             self.update()
@@ -153,6 +162,7 @@ class MainWindow(QWidget):
             return
         self._game.handle_input(
             SpellRequest(self._selector.affinity, self._selector.kind, directions))
+        print (grid.visited)
         grid.visited.clear()
 
     def _on_reset(self):

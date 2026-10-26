@@ -48,13 +48,18 @@ _AFFINITY_COLORS = {AffinityType.FIRE: "#ff7a2f", AffinityType.WATER: "#3fa9ff",
 class WorldRenderer(Renderer):
     def __init__(self, decals: DecalCache | None = None):
         self._decals = decals or DecalCache(SPRITES_ROOT)
-        self._grid_renderer = GridRenderer(Grid())
+        self._grid_renderer = GridRenderer(Grid(), settings.SPELL_CELL_SIZE, settings.SPELL_PADDING)
         self._slides: dict[int, tuple] = {}
         self._latched: dict[int, tuple] = {}
 
     @property
     def spell_grid(self) -> Grid:
         return self._grid_renderer.spell_grid
+
+    @property
+    def grid_view(self) -> GridRenderer:
+        """Poziția / vizibilitatea grilei; o mută MainWindow la click dreapta."""
+        return self._grid_renderer
 
     def render(self, painter: QPainter, scene: World) -> None:
         view = painter.viewport()
@@ -112,10 +117,7 @@ class WorldRenderer(Renderer):
             painter.drawText(rect.adjusted(0, 0, 0, -2), Qt.AlignBottom | Qt.AlignHCenter,
                              f"{e.hp}hp")
 
-        # gridul pentru spell, deocamdată în stânga-jos, peste hartă
-        self._grid_renderer.cell_size = lay.spell_cell_size
-        self._grid_renderer.offset_x = lay.grid_x
-        self._grid_renderer.offset_y = lay.grid_y
+        # gridul pentru spell, peste hartă, acolo unde s-a dat click dreapta
         self._grid_renderer.render(painter, scene)
 
         # HUD-ul din dreapta, peste hartă (harta NU se micșorează sub el)
